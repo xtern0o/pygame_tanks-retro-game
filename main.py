@@ -151,18 +151,61 @@ class ClassicPlayer(ClassicTank):
 
 
 class ClassicBot(ClassicTank):
-    def __init__(self, pos_x, pos_y, group, group_to_kill):
+    def __init__(self, pos_x, pos_y, group, group_to_kill, speed=3):
         super().__init__(pos_x, pos_y, group)
-        self.enemies_for_enemy = []
+        self.speed = speed
+        self.enemies = []
+        self.target = None
+        self.coords_to_move = None
         self.group_to_kill = group_to_kill
 
-    def enemy_finder(self):
+    def enemy_locator(self):
+        self.enemies = []
         for enemy in self.group_to_kill.sprites():
-            print(enemy)
+            self.enemies.append(enemy)
+        self.enemies = sorted(self.enemies, key=lambda sprite: (sprite.rect.x ** 2 + sprite.rect.y ** 2) ** 0.5)
 
     def update(self):
         super().update()
-        self.enemy_finder()
+        self.enemy_locator()
+        if self.enemies:
+            self.target = self.enemies[0]
+            self.target: ClassicTank
+            target_x, target_y = self.target.rect.centerx, self.target.rect.centery
+            if abs(target_x - self.rect.centerx) < abs(target_y - self.rect.centery):
+                if self.rect.centerx != target_x:
+                    if target_x - self.rect.centerx > self.speed:
+                        self.direction = DIRECTION_RIGHT
+                        self.rect = self.rect.move(self.speed, 0)
+                    elif target_x - self.rect.centerx < -self.speed:
+                        self.direction = DIRECTION_LEFT
+                        self.rect = self.rect.move(-self.speed, 0)
+                    else:
+                        if target_y - self.rect.centery > self.speed:
+                            self.direction = DIRECTION_DOWN
+                            self.rect = self.rect.move(0, self.speed)
+                        elif target_y - self.rect.centery < -self.speed:
+                            self.direction = DIRECTION_UP
+                            self.rect = self.rect.move(0, -self.speed)
+            else:
+                if self.rect.centery != target_y:
+                    if target_y - self.rect.centery > self.speed:
+                        self.direction = DIRECTION_DOWN
+                        self.rect = self.rect.move(0, self.speed)
+                    elif target_y - self.rect.centery < -self.speed:
+                        self.direction = DIRECTION_UP
+                        self.rect = self.rect.move(0, -self.speed)
+                    else:
+                        if target_x - self.rect.centerx > self.speed:
+                            self.direction = DIRECTION_RIGHT
+                            self.rect = self.rect.move(self.speed, 0)
+                        elif target_x - self.rect.centerx < -self.speed:
+                            self.direction = DIRECTION_LEFT
+                            self.rect = self.rect.move(-self.speed, 0)
+
+        self.image = images["classic_tank" + self.direction]
+        self.image.get_rect().center = self.rect.center
+
 
 
 class ClassicBullet(pg.sprite.Sprite):
@@ -267,7 +310,7 @@ pg.display.set_caption("Tanks Retro Game")
 map_board = MapBoard(20, 15)
 player = ClassicPlayer(30, 30)
 enemy1 = ClassicTank(100, 100, enemies_group)
-enemybot = ClassicBot(500, 500, enemies_group, player_group)
+enemybot = ClassicBot(500, 500, enemies_group, player_group, speed=2)
 
 clock = pg.time.Clock()
 while True:
