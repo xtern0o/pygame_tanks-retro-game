@@ -4,7 +4,6 @@ import pygame as pg
 import random
 from constants import *
 
-
 pg.init()
 size = W, H = 800, 600
 FPS = 60
@@ -25,12 +24,12 @@ def terminate():
 
 
 all_sprites = pg.sprite.Group()
-tanks_group = pg.sprite.Group()     # ClassicTank
-enemies_group = pg.sprite.Group()   # ClassicEnemy
-player_group = pg.sprite.Group()    # ClassicPlayer
-wall_group = pg.sprite.Group()      # Wall
-bullet_group = pg.sprite.Group()    # ClassicBullet
-borders_group = pg.sprite.Group()   # Border
+tanks_group = pg.sprite.Group()  # ClassicTank
+enemies_group = pg.sprite.Group()  # ClassicEnemy
+player_group = pg.sprite.Group()  # ClassicPlayer
+wall_group = pg.sprite.Group()  # Wall
+bullet_group = pg.sprite.Group()  # ClassicBullet
+borders_group = pg.sprite.Group()  # Border
 
 images = {
     "classic_tank_up": load_image("classic_tank.png"),
@@ -271,11 +270,12 @@ class ClassicBullet(pg.sprite.Sprite):
                 tank.hp -= self.damage
 
                 ClassicBullet.hit_sound.play()
-                ParticleHitTank(self.rect.center, random.choice(range(-5, 6)), random.choice(range(-20, -10)), self.owner.dmg)
+                ParticleHitTank(self.rect.center, random.choice(range(-5, 6)), random.choice(range(-20, -10)),
+                                self.owner.dmg)
         else:
             self.kill()
         self.distance -= self.speed
-        
+
 
 class GravityParticle(pg.sprite.Sprite):
     def __init__(self, pos, dx, dy, accel, image: pg.Surface):
@@ -285,7 +285,7 @@ class GravityParticle(pg.sprite.Sprite):
         self.rect.x, self.rect.y = pos
         self.velocity = [dx, dy]
         self.accel = accel
-    
+
     def update(self):
         self.velocity[1] += self.accel
         self.rect.x += self.velocity[0]
