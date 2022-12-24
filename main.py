@@ -58,10 +58,11 @@ class ClassicTank(pg.sprite.Sprite):
     kill_sound = pg.mixer.Sound("data/sounds/tank_boom.mp3")
     kill_sound.set_volume(0.3)
 
-    def __init__(self, pos_x, pos_y, group):
+    def __init__(self, pos_x, pos_y, group, enemy_group: pg.sprite.Group):
         super().__init__(all_sprites, group)
 
         self.font = pg.font.Font(None, 30)
+        self.enemy_group = enemy_group
 
         self.speed = 3
         self.dmg = 5
@@ -72,6 +73,7 @@ class ClassicTank(pg.sprite.Sprite):
         self.reload *= FPS
         self.reload_timer = 0
         self.is_reloaded = True
+        self.distance = 500
 
         self.image = images["classic_tank" + self.direction]
         self.rect = self.image.get_rect().move(pos_x, pos_y)
@@ -81,7 +83,7 @@ class ClassicTank(pg.sprite.Sprite):
         if self.is_reloaded:
             ClassicTank.shoot_sound.play()
             self.is_reloaded = False
-            ClassicBullet(self)
+            ClassicBullet(self, self.enemy_group)
 
     def update(self, *args):
         if self.hp > 60:
@@ -118,7 +120,7 @@ class ClassicTank(pg.sprite.Sprite):
 
 class ClassicPlayer(ClassicTank):
     def __init__(self, pos_x, pos_y):
-        super().__init__(pos_x, pos_y, player_group)
+        super().__init__(pos_x, pos_y, player_group, enemies_group)
 
     def update(self, *args):
         super().update(*args)
@@ -152,7 +154,7 @@ class ClassicPlayer(ClassicTank):
 
 class ClassicBot(ClassicTank):
     def __init__(self, pos_x, pos_y, group, group_to_kill, speed=3):
-        super().__init__(pos_x, pos_y, group)
+        super().__init__(pos_x, pos_y, group, group_to_kill)
         self.speed = speed
         self.enemies = []
         self.target = None
@@ -163,12 +165,14 @@ class ClassicBot(ClassicTank):
         self.enemies = []
         for enemy in self.group_to_kill.sprites():
             self.enemies.append(enemy)
+        # сортировка всех противников начиная с ближнего
         self.enemies = sorted(self.enemies, key=lambda sprite: (sprite.rect.x ** 2 + sprite.rect.y ** 2) ** 0.5)
 
     def update(self):
         super().update()
         self.enemy_locator()
         if self.enemies:
+            # идем к самому ближайшему
             self.target = self.enemies[0]
             self.target: ClassicTank
             target_x, target_y = self.target.rect.centerx, self.target.rect.centery
@@ -176,48 +180,67 @@ class ClassicBot(ClassicTank):
                 if self.rect.centerx != target_x:
                     if target_x - self.rect.centerx > self.speed:
                         self.direction = DIRECTION_RIGHT
-                        self.rect = self.rect.move(self.speed, 0)
+                        if not pg.sprite.spritecollideany(self, self.group_to_kill):
+                            self.rect = self.rect.move(self.speed, 0)
                     elif target_x - self.rect.centerx < -self.speed:
                         self.direction = DIRECTION_LEFT
-                        self.rect = self.rect.move(-self.speed, 0)
+                        if not pg.sprite.spritecollideany(self, self.group_to_kill):
+                            self.rect = self.rect.move(-self.speed, 0)
                     else:
-                        if target_y - self.rect.centery > self.speed:
+                        if target_y - self.rect.centery > self.distance:
                             self.direction = DIRECTION_DOWN
-                            self.rect = self.rect.move(0, self.speed)
-                        elif target_y - self.rect.centery < -self.speed:
+                            if not pg.sprite.spritecollideany(self, self.group_to_kill):
+                                self.rect = self.rect.move(0, self.speed)
+                        elif target_y - self.rect.centery < -self.distance:
                             self.direction = DIRECTION_UP
-                            self.rect = self.rect.move(0, -self.speed)
+                            if not pg.sprite.spritecollideany(self, self.group_to_kill):
+                                self.rect = self.rect.move(0, -self.speed)
+                        else:
+                            if target_y < self.rect.centery:
+                                self.direction = DIRECTION_UP
+                            else:
+                                self.direction = DIRECTION_DOWN
+                            self.shoot()
             else:
                 if self.rect.centery != target_y:
                     if target_y - self.rect.centery > self.speed:
                         self.direction = DIRECTION_DOWN
-                        self.rect = self.rect.move(0, self.speed)
+                        if not pg.sprite.spritecollideany(self, self.group_to_kill):
+                            self.rect = self.rect.move(0, self.speed)
                     elif target_y - self.rect.centery < -self.speed:
                         self.direction = DIRECTION_UP
-                        self.rect = self.rect.move(0, -self.speed)
+                        if not pg.sprite.spritecollideany(self, self.group_to_kill):
+                            self.rect = self.rect.move(0, -self.speed)
                     else:
-                        if target_x - self.rect.centerx > self.speed:
+                        if target_x - self.rect.centerx > self.distance:
                             self.direction = DIRECTION_RIGHT
-                            self.rect = self.rect.move(self.speed, 0)
-                        elif target_x - self.rect.centerx < -self.speed:
+                            if not pg.sprite.spritecollideany(self, self.group_to_kill):
+                                self.rect = self.rect.move(self.speed, 0)
+                        elif target_x - self.rect.centerx < -self.distance:
                             self.direction = DIRECTION_LEFT
-                            self.rect = self.rect.move(-self.speed, 0)
+                            if not pg.sprite.spritecollideany(self, self.group_to_kill):
+                                self.rect = self.rect.move(-self.speed, 0)
+                        else:
+                            if target_x < self.rect.centerx:
+                                self.direction = DIRECTION_LEFT
+                            else:
+                                self.direction = DIRECTION_RIGHT
+                            self.shoot()
 
         self.image = images["classic_tank" + self.direction]
         self.image.get_rect().center = self.rect.center
-
 
 
 class ClassicBullet(pg.sprite.Sprite):
     hit_sound = pg.mixer.Sound("data/sounds/hit_sound.mp3")
     hit_sound.set_volume(0.7)
 
-    def __init__(self, owner: ClassicTank):
+    def __init__(self, owner: ClassicTank, target_group: pg.sprite.Group):
         super().__init__(all_sprites, bullet_group)
         self.owner = owner
 
         self.speed = 10
-        self.distance = 500
+        self.distance = owner.distance
         self.damage = self.owner.dmg
         self.direction = self.owner.direction
         self.image = images["bullet" + self.direction]
@@ -242,7 +265,7 @@ class ClassicBullet(pg.sprite.Sprite):
             elif self.direction == DIRECTION_LEFT:
                 self.rect = self.rect.move(-self.speed, 0)
 
-            hits = pg.sprite.groupcollide(enemies_group, bullet_group, False, True)
+            hits = pg.sprite.groupcollide(self.owner.enemy_group, bullet_group, False, True)
             for tank in hits:
                 tank: ClassicTank
                 tank.hp -= self.damage
@@ -309,7 +332,7 @@ pg.display.set_caption("Tanks Retro Game")
 
 map_board = MapBoard(20, 15)
 player = ClassicPlayer(30, 30)
-enemy1 = ClassicTank(100, 100, enemies_group)
+enemy1 = ClassicTank(100, 100, enemies_group, player_group)
 enemybot = ClassicBot(500, 500, enemies_group, player_group, speed=2)
 
 clock = pg.time.Clock()
