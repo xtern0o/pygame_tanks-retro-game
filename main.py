@@ -6,7 +6,7 @@ from constants import *
 
 
 pg.init()
-size = w, h = 800, 600
+size = W, H = 800, 600
 FPS = 60
 
 
@@ -30,6 +30,7 @@ enemies_group = pg.sprite.Group()   # ClassicEnemy
 player_group = pg.sprite.Group()    # ClassicPlayer
 wall_group = pg.sprite.Group()      # Wall
 bullet_group = pg.sprite.Group()    # ClassicBullet
+borders_group = pg.sprite.Group()   # Border
 
 images = {
     "classic_tank_up": load_image("classic_tank.png"),
@@ -46,20 +47,28 @@ tank_width = tank_height = 50
 
 BLACK = pg.Color("black")
 WHITE = pg.Color("white")
+SOFT_GOLD = pg.Color("#CCAF5B")
+ORANGE = pg.Color("orange")
+RED = pg.Color("red")
 
 
 class ClassicTank(pg.sprite.Sprite):
+    shoot_sound = pg.mixer.Sound("data/sounds/classic_tank_shoot.mp3")
+    shoot_sound.set_volume(0.3)
+    kill_sound = pg.mixer.Sound("data/sounds/tank_boom.mp3")
+    kill_sound.set_volume(0.3)
+
     def __init__(self, pos_x, pos_y, group):
         super().__init__(all_sprites, group)
 
+        self.font = pg.font.Font(None, 30)
+
         self.speed = 3
-        self.dmg = 20
+        self.dmg = 5
         self.hp = 100
         self.direction = DIRECTION_UP
 
-        self.shoot_sound = pg.mixer.Sound("data/sounds/classic_tank_shoot.mp3")
-
-        self.reload = 2
+        self.reload = 0.3
         self.reload *= FPS
         self.reload_timer = 0
         self.is_reloaded = True
@@ -70,11 +79,22 @@ class ClassicTank(pg.sprite.Sprite):
     def shoot(self):
         # TODO: particles
         if self.is_reloaded:
-            bullet = ClassicBullet(self)
-            self.shoot_sound.play()
+            ClassicTank.shoot_sound.play()
             self.is_reloaded = False
+            ClassicBullet(self)
 
     def update(self, *args):
+        if self.hp > 60:
+            hp_text = self.font.render(str(self.hp), True, SOFT_GOLD)
+        elif self.hp >= 30:
+            hp_text = self.font.render(str(self.hp), True, ORANGE)
+        else:
+            hp_text = self.font.render(str(self.hp), True, RED)
+        hp_rect = self.rect.copy()
+        hp_rect.y -= 20
+        hp_rect.x -= 30
+        screen.blit(hp_text, hp_rect)
+
         if self.hp <= 0:
             self.kill_tank()
         if not self.is_reloaded:
@@ -85,7 +105,14 @@ class ClassicTank(pg.sprite.Sprite):
                 self.is_reloaded = True
 
     def kill_tank(self):
-        # TODO: particles
+        particle_count = 5
+        velocities_x = range(-5, 6)
+        velocities_y = range(-20, -5)
+        for _ in range(particle_count):
+            ParticleKilledTank((self.rect.centerx, self.rect.centery),
+                               random.choice(velocities_x), random.choice(velocities_y))
+
+        ClassicTank.kill_sound.play()
         self.kill()
 
 
@@ -123,7 +150,25 @@ class ClassicPlayer(ClassicTank):
             self.image.get_rect().center = self.rect.center
 
 
+class ClassicBot(ClassicTank):
+    def __init__(self, pos_x, pos_y, group, group_to_kill):
+        super().__init__(pos_x, pos_y, group)
+        self.enemies_for_enemy = []
+        self.group_to_kill = group_to_kill
+
+    def enemy_finder(self):
+        for enemy in self.group_to_kill.sprites():
+            print(enemy)
+
+    def update(self):
+        super().update()
+        self.enemy_finder()
+
+
 class ClassicBullet(pg.sprite.Sprite):
+    hit_sound = pg.mixer.Sound("data/sounds/hit_sound.mp3")
+    hit_sound.set_volume(0.7)
+
     def __init__(self, owner: ClassicTank):
         super().__init__(all_sprites, bullet_group)
         self.owner = owner
@@ -156,11 +201,41 @@ class ClassicBullet(pg.sprite.Sprite):
 
             hits = pg.sprite.groupcollide(enemies_group, bullet_group, False, True)
             for tank in hits:
+                tank: ClassicTank
                 tank.hp -= self.damage
-                # TODO: minus hp effect
+
+                ClassicBullet.hit_sound.play()
+                ParticleHitTank(self.rect.center, random.choice(range(-5, 6)), random.choice(range(-20, -10)), self.owner.dmg)
         else:
             self.kill()
         self.distance -= self.speed
+        
+
+class GravityParticle(pg.sprite.Sprite):
+    def __init__(self, pos, dx, dy, accel, image: pg.Surface):
+        super().__init__(all_sprites)
+        self.image = image
+        self.rect = self.image.get_rect()
+        self.rect.x, self.rect.y = pos
+        self.velocity = [dx, dy]
+        self.accel = accel
+    
+    def update(self):
+        self.velocity[1] += self.accel
+        self.rect.x += self.velocity[0]
+        self.rect.y += self.velocity[1]
+
+
+class ParticleKilledTank(GravityParticle):
+    def __init__(self, pos, dx, dy):
+        super().__init__(pos, dx, dy, 1, pg.transform.scale(load_image("star.png"), (30, 30)))
+
+
+class ParticleHitTank(GravityParticle):
+    def __init__(self, pos, dx, dy, damage):
+        self.font = pg.font.Font(None, 40)
+        hp_text = self.font.render("-" + str(damage), True, SOFT_GOLD)
+        super().__init__(pos, dx, dy, 1, hp_text)
 
 
 class MapBoard:
@@ -189,14 +264,12 @@ screen = pg.display.set_mode(size)
 screen.fill(BLACK)
 pg.display.set_caption("Tanks Retro Game")
 
-map = MapBoard(20, 15)
-
+map_board = MapBoard(20, 15)
 player = ClassicPlayer(30, 30)
 enemy1 = ClassicTank(100, 100, enemies_group)
-enemy2 = ClassicTank(500, 500, player_group)
+enemybot = ClassicBot(500, 500, enemies_group, player_group)
 
 clock = pg.time.Clock()
-
 while True:
     screen.fill(BLACK)
     clock.tick(FPS)
@@ -207,9 +280,9 @@ while True:
     keys_pressed = pg.key.get_pressed()
     if keys_pressed[pg.K_ESCAPE]:
         terminate()
-    player.update(keys_pressed)
 
-    map.render(screen)
+    player.update(keys_pressed)
+    map_board.render(screen)
 
     all_sprites.draw(screen)
     all_sprites.update()
