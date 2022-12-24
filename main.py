@@ -5,8 +5,6 @@ import random
 from constants import *
 
 pg.init()
-size = W, H = 800, 600
-FPS = 60
 
 
 def load_image(name):
@@ -27,9 +25,10 @@ all_sprites = pg.sprite.Group()
 tanks_group = pg.sprite.Group()  # ClassicTank
 enemies_group = pg.sprite.Group()  # ClassicEnemy
 player_group = pg.sprite.Group()  # ClassicPlayer
-wall_group = pg.sprite.Group()  # Wall
+wall_group = pg.sprite.Group()  # BrickWall
 bullet_group = pg.sprite.Group()  # ClassicBullet
 borders_group = pg.sprite.Group()  # Border
+booster_group = pg.sprite.Group()  # Booster
 
 images = {
     "classic_tank_up": load_image("classic_tank.png"),
@@ -41,8 +40,8 @@ images = {
     "bullet_left": pg.transform.flip(load_image("classic_bullet.png"), True, False),
     "bullet_up": pg.transform.rotate(load_image("classic_bullet.png"), 90),
     "bullet_down": pg.transform.flip(pg.transform.rotate(load_image("classic_bullet.png"), 90), False, True)
+
 }
-tank_width = tank_height = 50
 
 BLACK = pg.Color("black")
 WHITE = pg.Color("white")
@@ -82,7 +81,7 @@ class ClassicTank(pg.sprite.Sprite):
         if self.is_reloaded:
             ClassicTank.shoot_sound.play()
             self.is_reloaded = False
-            ClassicBullet(self, self.enemy_group)
+            ClassicBullet(self)
 
     def update(self, *args):
         if self.hp > 60:
@@ -231,10 +230,10 @@ class ClassicBot(ClassicTank):
 
 
 class ClassicBullet(pg.sprite.Sprite):
-    hit_sound = pg.mixer.Sound("data/sounds/hit_sound.mp3")
-    hit_sound.set_volume(0.7)
+    tank_hit_sound = pg.mixer.Sound("data/sounds/hit_sound.mp3")
+    tank_hit_sound.set_volume(0.7)
 
-    def __init__(self, owner: ClassicTank, target_group: pg.sprite.Group):
+    def __init__(self, owner: ClassicTank):
         super().__init__(all_sprites, bullet_group)
         self.owner = owner
 
@@ -269,9 +268,15 @@ class ClassicBullet(pg.sprite.Sprite):
                 tank: ClassicTank
                 tank.hp -= self.damage
 
-                ClassicBullet.hit_sound.play()
-                ParticleHitTank(self.rect.center, random.choice(range(-5, 6)), random.choice(range(-20, -10)),
-                                self.owner.dmg)
+                ClassicBullet.tank_hit_sound.play()
+                ParticleHitTank(self.rect.center, self.damage)
+
+            hits = pg.sprite.groupcollide(wall_group, bullet_group, False, True)
+            for wall in hits:
+                wall: BrickWall
+                wall.hp -= self.damage
+
+                ParticleHitBrick(self.rect.center, random.choice(range(-5, 6)), random.choice(range(-20, -10)))
         else:
             self.kill()
         self.distance -= self.speed
@@ -292,20 +297,72 @@ class GravityParticle(pg.sprite.Sprite):
         self.rect.y += self.velocity[1]
 
 
+class FlyingParticle(pg.sprite.Sprite):
+    def __init__(self, pos, image: pg.Surface, time: float, velocity: tuple = (1, -1)):
+        super().__init__(all_sprites)
+        self.image = image
+        self.rect = self.image.get_rect()
+        self.rect.x, self.rect.y = pos
+        self.time = time * FPS
+        self.current_time = self.time
+        self.velocity = velocity
+
+    def update(self):
+        if self.current_time >= 0:
+            self.rect = self.rect.move(*self.velocity)
+            self.current_time -= 1
+        else:
+            self.kill()
+
+
 class ParticleKilledTank(GravityParticle):
     def __init__(self, pos, dx, dy):
         super().__init__(pos, dx, dy, 1, pg.transform.scale(load_image("star.png"), (30, 30)))
 
 
-class ParticleHitTank(GravityParticle):
-    def __init__(self, pos, dx, dy, damage):
+class ParticleHitTank(FlyingParticle):
+    def __init__(self, pos, damage):
         self.font = pg.font.Font(None, 40)
         hp_text = self.font.render("-" + str(damage), True, SOFT_GOLD)
-        super().__init__(pos, dx, dy, 1, hp_text)
+        super().__init__(pos, hp_text, 1, (random.randint(-2, 3), random.randint(-2, 3)))
+
+
+class ParticleHitBrick(GravityParticle):
+    def __init__(self, pos, dx, dy):
+        super().__init__(pos, dx, dy, 1, load_image("brick_particle.png"))
+
+
+class BrickWall(pg.sprite.Sprite):
+    images = [load_image(f"brickwall_{i}.png") for i in range(4)]
+    brick_hit_sound = pg.mixer.Sound("data/sounds/brick_hit_sound.mp3")
+    brick_hit_sound.set_volume(0.4)
+
+    def __init__(self, pos_x, pos_y):
+        super().__init__(all_sprites, wall_group)
+        self.image = BrickWall.images[0]
+        self.rect = self.image.get_rect()
+        self.rect.centerx = pos_x
+        self.rect.centery = pos_y
+
+        self.hp = 80
+
+    def update(self):
+        if 40 < self.hp <= 60:
+            self.image = BrickWall.images[1]
+        elif 20 < self.hp <= 40:
+            self.image = BrickWall.images[2]
+        elif 0 < self.hp <= 20:
+            self.image = BrickWall.images[3]
+        elif self.hp <= 0:
+            BrickWall.brick_hit_sound.play()
+            self.break_wall()
+
+    def break_wall(self):
+        self.kill()
 
 
 class MapBoard:
-    def __init__(self, width, height, left=0, top=0, cell_size=40, color=pg.Color("#1F2310")):
+    def __init__(self, width, height, left=0, top=0, cell_size=50, color=pg.Color("#1F2310")):
         self.width = width
         self.height = height
         self.board = [[random.randint(0, 1) for _ in range(width)] for __ in range(height)]
@@ -326,14 +383,16 @@ class MapBoard:
                 pg.draw.rect(screen, self.border_color, (lt, (self.cell_size, self.cell_size)), 1)
 
 
-screen = pg.display.set_mode(size)
+screen = pg.display.set_mode(SIZE)
 screen.fill(BLACK)
 pg.display.set_caption("Tanks Retro Game")
 
-map_board = MapBoard(20, 15)
+map_board = MapBoard(16, 12)
 player = ClassicPlayer(30, 30)
 enemy1 = ClassicTank(100, 100, enemies_group, player_group)
 enemybot = ClassicBot(500, 500, enemies_group, player_group, speed=2)
+teammatebot = ClassicBot(200, 50, player_group, enemies_group)
+wall1 = BrickWall(300, 100)
 
 clock = pg.time.Clock()
 while True:
@@ -352,4 +411,5 @@ while True:
 
     all_sprites.draw(screen)
     all_sprites.update()
+
     pg.display.flip()
