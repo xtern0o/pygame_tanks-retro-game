@@ -10,7 +10,7 @@
 # ТЗ
 1) Реализовать класс `ClassicTank` и `ClassicPlayer` с функцией управления игроком
 2) Реализовать класс `Bullet`
-3) Реализовать класс `Artillery`
+3) Реализовать класс `Artillery` + 'ArtilleryPlayer'
 4) Реализовать класс `Map` и функцию `genereate_level()`
 5) Реализовать класс `ClassicTankBot`, являющийся аналогом классического танка с готовым искусственным интеллектом (алгоритмом)
 6) Реализовать классы бустеров `SpeedBooster`, `DamageBooster`, `ArmorBooster`, `HealthBooster`
