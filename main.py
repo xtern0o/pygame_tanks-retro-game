@@ -31,6 +31,7 @@ wall_group = pg.sprite.Group()      # BrickWall
 bullet_group = pg.sprite.Group()    # ClassicBullet
 booster_group = pg.sprite.Group()   # Booster
 mine_group = pg.sprite.Group()      # Mine
+border_group = pg.sprite.Group()    # Border
 
 images = {
     "classic_tank_up": load_image("classic_tank.png"),
@@ -41,7 +42,18 @@ images = {
     "bullet_right": load_image("classic_bullet.png"),
     "bullet_left": pg.transform.flip(load_image("classic_bullet.png"), True, False),
     "bullet_up": pg.transform.rotate(load_image("classic_bullet.png"), 90),
-    "bullet_down": pg.transform.flip(pg.transform.rotate(load_image("classic_bullet.png"), 90), False, True)
+    "bullet_down": pg.transform.flip(pg.transform.rotate(load_image("classic_bullet.png"), 90), False, True),
+
+    "bul_part_right": load_image("classic_bullet_particle.png"),
+    "bul_part_left": load_image("classic_bullet_particle.png"),
+    "bul_part_up": pg.transform.rotate(load_image("classic_bullet_particle.png"), 90),
+    "bul_part_down": pg.transform.rotate(load_image("classic_bullet_particle.png"), 90),
+
+    "fire_part_right": load_image("fire_particle.png"),
+    "fire_part_left": load_image("fire_particle.png"),
+    "fire_part_up": pg.transform.rotate(load_image("fire_particle.png"), 90),
+    "fire_part_down": pg.transform.rotate(load_image("fire_particle.png"), 90)
+
 }
 
 BLACK = pg.Color("black")
@@ -84,16 +96,17 @@ class ClassicTank(pg.sprite.Sprite):
                                    ARMOR_BOOSTER: False}
 
     def shoot(self):
-        # TODO: particles
         if self.is_reloaded:
+            for _ in range(30):
+                FireParticle(self)
             ClassicTank.shoot_sound.play()
             self.is_reloaded = False
             ClassicBullet(self)
 
     def update(self, *args):
-        if self.hp > self.hp * 2 / 3:
+        if self.hp > CLASSIC_TANK_CFG["hp"] * 2 / 3:
             hp_text = self.font.render(str(self.hp), True, SOFT_GOLD)
-        elif self.hp >= self.hp / 3:
+        elif self.hp >= CLASSIC_TANK_CFG["hp"] / 3:
             hp_text = self.font.render(str(self.hp), True, ORANGE)
         else:
             hp_text = self.font.render(str(self.hp), True, RED)
@@ -151,8 +164,12 @@ class ClassicTank(pg.sprite.Sprite):
 
         else:
             self.hp = self.hp + BOOSTERS_CFG["hb_healing"]
-            if self.hp > 100:
-                self.hp -= self.hp % 100
+            if self.boosters_activated[ARMOR_BOOSTER]:
+                if self.hp > CLASSIC_TANK_CFG["hp"] * 2:
+                    self.hp = CLASSIC_TANK_CFG["hp"] * 2
+            else:
+                if self.hp > CLASSIC_TANK_CFG["hp"]:
+                    self.hp = CLASSIC_TANK_CFG["hp"]
 
 
 class ClassicTankPlayer(ClassicTank):
@@ -325,7 +342,10 @@ class ClassicBullet(pg.sprite.Sprite):
                 wall.hp -= self.damage
 
                 ParticleHitBrick(self.rect.center, random.choice(range(-5, 6)), random.choice(range(-20, -10)))
+            ClassicBulletParticle(self)
         else:
+            for _ in range(20):
+                ClassicBulletParticle(self)
             self.kill()
         self.distance -= self.speed
 
@@ -338,11 +358,18 @@ class GravityParticle(pg.sprite.Sprite):
         self.rect.x, self.rect.y = pos
         self.velocity = [dx, dy]
         self.accel = accel
+        self.time = 60
+        self.current_time = 60
 
     def update(self):
-        self.velocity[1] += self.accel
-        self.rect.x += self.velocity[0]
-        self.rect.y += self.velocity[1]
+        if self.current_time > 0:
+            self.current_time -= 1
+            self.image.set_alpha(255 * self.current_time // self.time)
+            self.velocity[1] += self.accel
+            self.rect.x += self.velocity[0]
+            self.rect.y += self.velocity[1]
+        else:
+            self.kill()
 
 
 class FlyingParticle(pg.sprite.Sprite):
@@ -358,6 +385,7 @@ class FlyingParticle(pg.sprite.Sprite):
         self.velocity = velocity
 
     def update(self):
+        self.image.set_alpha(255 * self.current_time // self.time)
         if self.current_time >= 0:
             self.rect = self.rect.move(*self.velocity)
             self.current_time -= 1
@@ -380,6 +408,65 @@ class ParticleHitTank(FlyingParticle):
 class ParticleHitBrick(GravityParticle):
     def __init__(self, pos, dx, dy):
         super().__init__(pos, dx, dy, 1, load_image("brick_particle.png"))
+
+
+class ClassicBulletParticle(pg.sprite.Sprite):
+    def __init__(self, bullet: ClassicBullet):
+        super().__init__(all_sprites)
+        self.image = images["bul_part" + bullet.direction]
+        self.time = 5
+        self.rect = self.image.get_rect()
+        self.velocity = []
+        if bullet.direction == DIRECTION_UP:
+            self.rect.midtop = bullet.rect.midbottom
+            self.velocity = [random.randint(-1, 2), random.randint(-9, -6)]
+        elif bullet.direction == DIRECTION_DOWN:
+            self.rect.midbottom = bullet.rect.midtop
+            self.velocity = [random.randint(-1, 2), random.randint(5, 10)]
+        elif bullet.direction == DIRECTION_RIGHT:
+            self.rect.midright = bullet.rect.midleft
+            self.velocity = [random.randint(5, 10), random.randint(-1, 2)]
+        elif bullet.direction == DIRECTION_LEFT:
+            self.rect.midleft = bullet.rect.midright
+            self.velocity = [random.randint(-9, -6), random.randint(-1, 2)]
+
+
+    def update(self):
+        self.image.set_alpha(255 * self.time // 10)
+        if self.time:
+            self.time -= 1
+            self.rect = self.rect.move(*self.velocity)
+        else:
+            self.kill()
+
+
+class FireParticle(pg.sprite.Sprite):
+    def __init__(self, tank: ClassicTank):
+        super().__init__(all_sprites)
+        self.image = images["fire_part" + tank.direction]
+        self.time = 15
+        self.rect = self.image.get_rect()
+        self.velocity = []
+        if tank.direction == DIRECTION_DOWN:
+            self.rect.midtop = tank.rect.midbottom
+            self.velocity = [random.randint(-1, 2), random.randint(5, 10)]
+        elif tank.direction == DIRECTION_UP:
+            self.rect.midbottom = tank.rect.midtop
+            self.velocity = [random.randint(-1, 2), random.randint(-9, -6)]
+        elif tank.direction == DIRECTION_LEFT:
+            self.rect.midright = tank.rect.midleft
+            self.velocity = [random.randint(-9, -6), random.randint(-1, 2)]
+        elif tank.direction == DIRECTION_RIGHT:
+            self.rect.midleft = tank.rect.midright
+            self.velocity = [random.randint(5, 10), random.randint(-1, 2)]
+
+    def update(self):
+        self.image.set_alpha(255 * self.time // 10)
+        if self.time:
+            self.time -= 1
+            self.rect = self.rect.move(*self.velocity)
+        else:
+            self.kill()
 
 
 class BrickWall(pg.sprite.Sprite):
@@ -421,11 +508,16 @@ class Booster(pg.sprite.Sprite):
         self.time = time
         self.rect = self.image.get_rect()
         self.rect.center = (pos_x, pos_y)
-
         self.time_before_remove = BOOSTERS_CFG["time_before_remove"]
+
+        self.font = pg.font.Font(None, 20)
 
     def update(self):
         if self.time_before_remove:
+            hp_text = self.font.render(str(self.time_before_remove), True, SOFT_GOLD)
+            hp_rect = self.rect.copy()
+            hp_rect.y -= 20
+            screen.blit(hp_text, hp_rect)
             self.time_before_remove -= 1
             collides = pg.sprite.groupcollide(tanks_group, booster_group, False, True)
             for tank in collides:
@@ -453,7 +545,7 @@ class ArmorBooster(Booster):
 
 class HealthBooster(Booster):
     def __init__(self, pos_x, pos_y):
-        super().__init__(load_image("health_booster.png"), HEALTH_BOOSTER, BOOSTERS_CFG["hb_time"], pos_x, pos_y)
+        super().__init__(load_image("health_booster.png"), HEALTH_BOOSTER, None, pos_x, pos_y)
 
 
 class MapBoard:
@@ -487,7 +579,7 @@ screen = pg.display.set_mode(SIZE)
 screen.fill(BLACK)
 pg.display.set_caption("Tanks Retro Game")
 
-map_board = MapBoard(16, 12)
+map_board = MapBoard(16, 10)
 player = ClassicTankPlayer(30, 30)
 enemy1 = ClassicTank(100, 100, enemies_group, player_group)
 enemybot = ClassicTankBot(500, 500, enemies_group, player_group, speed=2)
@@ -495,7 +587,10 @@ teammatebot = ClassicTankBot(200, 50, player_group, enemies_group)
 wall1 = BrickWall(*map_board.get_cell_center(2, 5))
 wall2 = BrickWall(*map_board.get_cell_center(2, 6))
 wall3 = BrickWall(*map_board.get_cell_center(3, 5))
-booster = DamageBooster(*map_board.get_cell_center(9, 1))
+dambooster = DamageBooster(*map_board.get_cell_center(9, 1))
+spebooster = SpeedBooster(*map_board.get_cell_center(10, 1))
+armbooster = ArmorBooster(*map_board.get_cell_center(11, 1))
+heabooster = HealthBooster(*map_board.get_cell_center(12, 1))
 
 clock = pg.time.Clock()
 while True:
