@@ -61,6 +61,12 @@ WHITE = pg.Color("white")
 SOFT_GOLD = pg.Color("#CCAF5B")
 ORANGE = pg.Color("orange")
 RED = pg.Color("red")
+DARKGREEN = pg.Color("darkgreen")
+GREEN = pg.Color("green")
+YELLOW = pg.Color("yellow")
+DARKRED = pg.Color("darkred")
+BROWN = pg.Color("brown")
+
 
 
 class ClassicTank(pg.sprite.Sprite):
@@ -71,6 +77,8 @@ class ClassicTank(pg.sprite.Sprite):
 
     def __init__(self, pos_x, pos_y, group, enemy_group: pg.sprite.Group):
         super().__init__(all_sprites, group, tanks_group)
+
+        self.objectname = "ClassicTank"
 
         self.font = pg.font.Font(None, 30)
         self.enemy_group = enemy_group
@@ -97,7 +105,7 @@ class ClassicTank(pg.sprite.Sprite):
 
     def shoot(self):
         if self.is_reloaded:
-            for _ in range(30):
+            for _ in range(self.dmg * 2):
                 FireParticle(self)
             ClassicTank.shoot_sound.play()
             self.is_reloaded = False
@@ -176,6 +184,7 @@ class ClassicTankPlayer(ClassicTank):
     def __init__(self, pos_x, pos_y):
         super().__init__(pos_x, pos_y, player_group, enemies_group)
         self.killed = False
+        self.objectname = NICKNAME
 
     def update(self, *args):
         if not self.killed:
@@ -218,6 +227,7 @@ class ClassicTankPlayer(ClassicTank):
 class ClassicTankBot(ClassicTank):
     def __init__(self, pos_x, pos_y, group, group_to_kill, speed=3):
         super().__init__(pos_x, pos_y, group, group_to_kill)
+        self.objectname = "bot"
         self.speed = speed
         self.enemies = []
         self.target = None
@@ -444,21 +454,21 @@ class FireParticle(pg.sprite.Sprite):
     def __init__(self, tank: ClassicTank):
         super().__init__(all_sprites)
         self.image = images["fire_part" + tank.direction]
-        self.time = 15
+        self.time = 12
         self.rect = self.image.get_rect()
         self.velocity = []
         if tank.direction == DIRECTION_DOWN:
             self.rect.midtop = tank.rect.midbottom
-            self.velocity = [random.randint(-1, 2), random.randint(5, 10)]
+            self.velocity = [random.randint(-3, 4), random.randint(4, 7)]
         elif tank.direction == DIRECTION_UP:
             self.rect.midbottom = tank.rect.midtop
-            self.velocity = [random.randint(-1, 2), random.randint(-9, -6)]
+            self.velocity = [random.randint(-3, 4), random.randint(-6, -3)]
         elif tank.direction == DIRECTION_LEFT:
             self.rect.midright = tank.rect.midleft
-            self.velocity = [random.randint(-9, -6), random.randint(-1, 2)]
+            self.velocity = [random.randint(-6, -3), random.randint(-3, 4)]
         elif tank.direction == DIRECTION_RIGHT:
             self.rect.midleft = tank.rect.midright
-            self.velocity = [random.randint(5, 10), random.randint(-1, 2)]
+            self.velocity = [random.randint(4, 7), random.randint(-3, 4)]
 
     def update(self):
         self.image.set_alpha(255 * self.time // 10)
@@ -511,21 +521,30 @@ class Booster(pg.sprite.Sprite):
         self.time_before_remove = BOOSTERS_CFG["time_before_remove"]
 
         self.font = pg.font.Font(None, 20)
+        self.hp_rect = self.rect.copy().move(0, -20)
+        self.time_to_fly = 120
 
     def update(self):
         if self.time_before_remove:
             hp_text = self.font.render(str(self.time_before_remove), True, SOFT_GOLD)
-            hp_rect = self.rect.copy()
-            hp_rect.y -= 20
-            screen.blit(hp_text, hp_rect)
+            screen.blit(hp_text, self.hp_rect)
             self.time_before_remove -= 1
             collides = pg.sprite.groupcollide(tanks_group, booster_group, False, True)
             for tank in collides:
                 tank: ClassicTank
                 Booster.activation_sound.play()
                 tank.activate_booster(self)
+                print(self.booster_type)
         else:
-            self.kill()
+            self.image.set_alpha(255 * self.time_to_fly // 120)
+            self.rect = self.rect.move(0, -1)
+            self.hp_rect = self.hp_rect.move(0, -1)
+
+            self.time_to_fly -= 1
+            hp_text = self.font.render("~" + str(self.time_to_fly), True, RED)
+            screen.blit(hp_text, self.hp_rect)
+            if self.time_to_fly <= 0:
+                self.kill()
 
 
 class SpeedBooster(Booster):
@@ -545,7 +564,7 @@ class ArmorBooster(Booster):
 
 class HealthBooster(Booster):
     def __init__(self, pos_x, pos_y):
-        super().__init__(load_image("health_booster.png"), HEALTH_BOOSTER, None, pos_x, pos_y)
+        super().__init__(load_image("health_booster.png"), HEALTH_BOOSTER, 0, pos_x, pos_y)
 
 
 class MapBoard:
@@ -575,6 +594,51 @@ class MapBoard:
                 self.top + self.cell_size // 2 + y * self.cell_size)
 
 
+class InterfaceForClassicTank:
+    font = pg.font.Font(None, 30)
+
+    def __init__(self, tank: ClassicTank):
+        self.tank = tank
+        self.hp_rect = pg.Rect(660, 635, 100, 30)
+        self.reload_rect = pg.Rect(660, 660, 100, 30)
+
+        self.sp_b_rect = pg.Rect(50 * (1 + 4) + 10, 610, 80, 10)
+        self.ar_b_rect = pg.Rect(50 * (1 + 6) + 10, 610, 80, 10)
+        self.dd_b_rect = pg.Rect(50 * (1 + 8) + 10, 610, 80, 10)
+
+        self.name_rect = pg.Rect(50 * (1 + 4), 570, 400, 30)
+
+    def update(self):
+        pg.draw.rect(screen, SOFT_GOLD, pg.Rect(50 * (1 + 4), 600, 400, 30), border_radius=5, width=3)
+        pg.draw.rect(screen, DARKRED, pg.Rect(50 * (1 + 4), 640, 400, 15), border_radius=3, width=2)
+        pg.draw.rect(screen, YELLOW, pg.Rect(50 * (1 + 4), 665, 400, 15), border_radius=3, width=2)
+        screen.blit(InterfaceForClassicTank.font.render(self.tank.objectname, True, SOFT_GOLD), self.name_rect)
+
+        if not self.tank.boosters_activated[ARMOR_BOOSTER]:
+            pg.draw.rect(screen, DARKRED, pg.Rect(50 * (1 + 4), 640, 400 * self.tank.hp // CLASSIC_TANK_CFG["hp"], 15),
+                     border_radius=3)
+        else:
+            pg.draw.rect(screen, DARKRED, pg.Rect(50 * (1 + 4), 640, 400 * self.tank.hp // (CLASSIC_TANK_CFG["hp"] * 2),
+                                                  15), border_radius=3)
+        screen.blit(InterfaceForClassicTank.font.render(f"{self.tank.hp / CLASSIC_TANK_CFG['hp'] * 100}%",
+                                                        True, DARKRED), self.hp_rect)
+
+        if not self.tank.is_reloaded:
+            pg.draw.rect(screen, YELLOW, pg.Rect(50 * (1 + 4), 665,
+                        400 * self.tank.reload_timer // self.tank.reload, 15), border_radius=3)
+            screen.blit(InterfaceForClassicTank.font.render(f"{((self.tank.reload - self.tank.reload_timer) / 60):0.2f}",
+                                                            True, YELLOW), self.reload_rect)
+        else:
+            pg.draw.rect(screen, YELLOW, pg.Rect(50 * (1 + 4), 665, 400, 15), border_radius=3)
+
+        if self.tank.boosters_activated[SPEED_BOOSTER]:
+            pg.draw.rect(screen, YELLOW, self.sp_b_rect, border_radius=3)
+        if self.tank.boosters_activated[ARMOR_BOOSTER]:
+            pg.draw.rect(screen, BROWN, self.ar_b_rect, border_radius=3)
+        if self.tank.boosters_activated[DAMAGE_BOOSTER]:
+            pg.draw.rect(screen, RED, self.dd_b_rect, border_radius=3)
+
+
 screen = pg.display.set_mode(SIZE)
 screen.fill(BLACK)
 pg.display.set_caption("Tanks Retro Game")
@@ -592,6 +656,7 @@ spebooster = SpeedBooster(*map_board.get_cell_center(10, 1))
 armbooster = ArmorBooster(*map_board.get_cell_center(11, 1))
 heabooster = HealthBooster(*map_board.get_cell_center(12, 1))
 
+interface = InterfaceForClassicTank(player)
 clock = pg.time.Clock()
 while True:
     screen.fill(BLACK)
@@ -603,11 +668,11 @@ while True:
     keys_pressed = pg.key.get_pressed()
     if keys_pressed[pg.K_ESCAPE]:
         terminate()
-
     player.update(keys_pressed)
     map_board.render(screen)
 
     all_sprites.draw(screen)
     all_sprites.update()
 
+    interface.update()
     pg.display.flip()

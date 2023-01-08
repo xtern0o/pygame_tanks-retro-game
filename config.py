@@ -1,6 +1,7 @@
+NICKNAME = "PlayerName"
 CLASSIC_TANK_CFG = {
     "speed": 3,
-    "damage": 5,
+    "damage": 10,
     "hp": 100,
     "reload": 0.8,
     "fire_distance": 500
