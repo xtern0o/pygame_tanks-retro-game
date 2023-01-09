@@ -121,10 +121,12 @@ class ClassicTank(pg.sprite.Sprite):
             color = RED
         pg.draw.rect(screen, color, pg.Rect(self.rect.left - 5, self.rect.top - 20, 50, 10), width=2)
         if not self.boosters_activated[ARMOR_BOOSTER]:
-            pg.draw.rect(screen, color, pg.Rect(self.rect.left - 5, self.rect.top - 20, 50 * self.hp // CLASSIC_TANK_CFG["hp"], 10))
+            pg.draw.rect(screen, color,
+                         pg.Rect(self.rect.left - 5, self.rect.top - 20, 50 * self.hp // CLASSIC_TANK_CFG["hp"], 10))
         else:
             pg.draw.rect(screen, color,
-                         pg.Rect(self.rect.left - 5, self.rect.top - 20, 50 * self.hp // (CLASSIC_TANK_CFG["hp"] * 2), 10))
+                         pg.Rect(self.rect.left - 5, self.rect.top - 20, 50 * self.hp // (CLASSIC_TANK_CFG["hp"] * 2),
+                                 10))
 
         if self.hp <= 0:
             self.kill_tank()
@@ -151,6 +153,9 @@ class ClassicTank(pg.sprite.Sprite):
 
         for booster_to_pop in to_pop:
             self.boosters.pop(booster_to_pop)
+
+        if self.boosters_activated[SPEED_BOOSTER]:
+            pass
 
     def kill_tank(self):
         particle_count = 5
@@ -613,6 +618,9 @@ class InterfaceForClassicTank:
 
         self.name_rect = pg.Rect(50 * (1 + 4), 570, 400, 30)
 
+        self.dmg_rect = pg.Rect(50, 600, 100, 30)
+        self.distance_rect = pg.Rect(50, 630, 100, 30)
+
     def update(self):
         pg.draw.circle(screen, GRAY, self.tank.rect.center, 20)
 
@@ -649,6 +657,11 @@ class InterfaceForClassicTank:
         if self.tank.boosters_activated[DAMAGE_BOOSTER]:
             pg.draw.rect(screen, RED, self.dd_b_rect, border_radius=3)
 
+        screen.blit(InterfaceForClassicTank.font.render(f"Damage:       {self.tank.dmg}", True, SOFT_GOLD),
+                    self.dmg_rect)
+        screen.blit(InterfaceForClassicTank.font.render(f"Fire range:   {self.tank.fire_distance}", True, SOFT_GOLD),
+                    self.distance_rect)
+
 
 screen = pg.display.set_mode(SIZE)
 screen.fill(BLACK)
@@ -682,7 +695,7 @@ while True:
                 if tank.rect.left <= x <= tank.rect.right and tank.rect.top <= y <= tank.rect.bottom:
                     interface = InterfaceForClassicTank(tank)
                     for _ in range(30):
-                        FlyingParticle((x, y), load_image("fire_particle.png"), 3,
+                        FlyingParticle((x, y), load_image("fire_particle.png"), 1,
                                        (random.randint(-5, 6), random.randint(-5, 6)))
 
     keys_pressed = pg.key.get_pressed()
