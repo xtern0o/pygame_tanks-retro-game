@@ -605,50 +605,56 @@ class MapBoard:
 
 
 class InterfaceForClassicTank:
-    font = pg.font.Font(None, 30)
+    font = pg.font.Font("data/font/ARCADE_N.TTF", 15)
 
     def __init__(self, tank: ClassicTank):
         self.tank = tank
-        self.hp_rect = pg.Rect(660, 635, 100, 30)
-        self.reload_rect = pg.Rect(660, 660, 100, 30)
+        self.hp_rect = pg.Rect(710, 635, 100, 30)
+        self.reload_rect = pg.Rect(710, 660, 100, 30)
 
-        self.sp_b_rect = pg.Rect(50 * (1 + 4) + 10, 610, 80, 10)
-        self.ar_b_rect = pg.Rect(50 * (1 + 6) + 10, 610, 80, 10)
-        self.dd_b_rect = pg.Rect(50 * (1 + 8) + 10, 610, 80, 10)
+        self.sp_b_rect = pg.Rect(50 * (1 + 5) + 10, 610, 80, 10)
+        self.ar_b_rect = pg.Rect(50 * (1 + 7) + 10, 610, 80, 10)
+        self.dd_b_rect = pg.Rect(50 * (1 + 9) + 10, 610, 80, 10)
 
-        self.name_rect = pg.Rect(50 * (1 + 4), 570, 400, 30)
+        self.name_rect = pg.Rect(50 * (1 + 5), 570, 400, 30)
 
         self.dmg_rect = pg.Rect(50, 600, 100, 30)
         self.distance_rect = pg.Rect(50, 630, 100, 30)
+        self.speed_rect = pg.Rect(50, 660, 100, 30)
 
     def update(self):
         pg.draw.circle(screen, GRAY, self.tank.rect.center, 20)
 
-        pg.draw.rect(screen, SOFT_GOLD, pg.Rect(50 * (1 + 4), 600, 400, 30), border_radius=5, width=3)
-        pg.draw.rect(screen, DARKRED, pg.Rect(50 * (1 + 4), 640, 400, 15), border_radius=3, width=2)
-        pg.draw.rect(screen, YELLOW, pg.Rect(50 * (1 + 4), 665, 400, 15), border_radius=3, width=2)
+        pg.draw.rect(screen, SOFT_GOLD, pg.Rect(50 * (1 + 5), 600, 400, 30), border_radius=5, width=3)
+        pg.draw.rect(screen, DARKRED, pg.Rect(50 * (1 + 5), 640, 400, 15), border_radius=3, width=2)
+        pg.draw.rect(screen, YELLOW, pg.Rect(50 * (1 + 5), 665, 400, 15), border_radius=3, width=2)
+        if isinstance(self.tank, ClassicTankPlayer):
+            InterfaceForClassicTank.font.underline = True
+            InterfaceForClassicTank.font.bold = True
         if not self.tank.killed:
             screen.blit(InterfaceForClassicTank.font.render(self.tank.objectname, True, SOFT_GOLD), self.name_rect)
         else:
             screen.blit(InterfaceForClassicTank.font.render(self.tank.objectname + " (killed)", True, DARKRED),
                         self.name_rect)
+        InterfaceForClassicTank.font.underline = False
+        InterfaceForClassicTank.font.bold = False
 
         if not self.tank.boosters_activated[ARMOR_BOOSTER]:
-            pg.draw.rect(screen, DARKRED, pg.Rect(50 * (1 + 4), 640, 400 * self.tank.hp // CLASSIC_TANK_CFG["hp"], 15),
+            pg.draw.rect(screen, DARKRED, pg.Rect(50 * (1 + 5), 640, 400 * self.tank.hp // CLASSIC_TANK_CFG["hp"], 15),
                      border_radius=3)
         else:
-            pg.draw.rect(screen, DARKRED, pg.Rect(50 * (1 + 4), 640, 400 * self.tank.hp // (CLASSIC_TANK_CFG["hp"] * 2),
+            pg.draw.rect(screen, DARKRED, pg.Rect(50 * (1 + 5), 640, 400 * self.tank.hp // (CLASSIC_TANK_CFG["hp"] * 2),
                                                   15), border_radius=3)
         screen.blit(InterfaceForClassicTank.font.render(f"{self.tank.hp / CLASSIC_TANK_CFG['hp'] * 100}%",
                                                         True, DARKRED), self.hp_rect)
 
         if not self.tank.is_reloaded:
-            pg.draw.rect(screen, YELLOW, pg.Rect(50 * (1 + 4), 665,
+            pg.draw.rect(screen, YELLOW, pg.Rect(50 * (1 + 5), 665,
                         400 * self.tank.reload_timer // self.tank.reload, 15), border_radius=3)
             screen.blit(InterfaceForClassicTank.font.render(f"{((self.tank.reload - self.tank.reload_timer) / 60):0.2f}",
                                                             True, YELLOW), self.reload_rect)
         else:
-            pg.draw.rect(screen, YELLOW, pg.Rect(50 * (1 + 4), 665, 400, 15), border_radius=3)
+            pg.draw.rect(screen, YELLOW, pg.Rect(50 * (1 + 5), 665, 400, 15), border_radius=3)
 
         if self.tank.boosters_activated[SPEED_BOOSTER]:
             pg.draw.rect(screen, YELLOW, self.sp_b_rect, border_radius=3)
@@ -657,10 +663,12 @@ class InterfaceForClassicTank:
         if self.tank.boosters_activated[DAMAGE_BOOSTER]:
             pg.draw.rect(screen, RED, self.dd_b_rect, border_radius=3)
 
-        screen.blit(InterfaceForClassicTank.font.render(f"Damage:       {self.tank.dmg}", True, SOFT_GOLD),
+        screen.blit(InterfaceForClassicTank.font.render(f"Damage:     {self.tank.dmg}", True, SOFT_GOLD),
                     self.dmg_rect)
-        screen.blit(InterfaceForClassicTank.font.render(f"Fire range:   {self.tank.fire_distance}", True, SOFT_GOLD),
+        screen.blit(InterfaceForClassicTank.font.render(f"Fire range: {self.tank.fire_distance}", True, SOFT_GOLD),
                     self.distance_rect)
+        screen.blit(InterfaceForClassicTank.font.render(f"Speed:      {self.tank.speed}", True, SOFT_GOLD),
+                    self.speed_rect)
 
 
 screen = pg.display.set_mode(SIZE)
@@ -669,7 +677,6 @@ pg.display.set_caption("Tanks Retro Game")
 
 map_board = MapBoard(16, 10)
 player = ClassicTankPlayer(30, 30)
-enemy1 = ClassicTank(100, 100, enemies_group, player_group)
 enemybot = ClassicTankBot(500, 500, enemies_group, player_group, speed=2)
 teammatebot = ClassicTankBot(200, 50, player_group, enemies_group)
 wall1 = BrickWall(*map_board.get_cell_center(2, 5))
