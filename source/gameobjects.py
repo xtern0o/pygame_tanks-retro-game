@@ -579,6 +579,29 @@ class HealthBooster(Booster):
         super().__init__(load_image("health_booster.png"), HEALTH_BOOSTER, 0, pos_x, pos_y)
 
 
+class Mine(pg.sprite.Sprite):
+    def __init__(self, pos_x, pos_y, group, group_to_kill):
+        super().__init__(all_sprites, mine_group)
+        self.image = load_image("mine.png")
+        self.rect = self.image.get_rect()
+        self.rect.center = pos_x, pos_y
+        self.boom_radius = MINE_CFG["boom_rad"]
+        self.team = group
+        self.enemy = group_to_kill
+        self.time_before_invisible = MINE_CFG["time_before_invisible"] * FPS
+
+    def update(self):
+        if self.time_before_invisible > 0:
+            self.time_before_invisible -= 1
+            self.image.set_alpha(255 * self.time_before_invisible / MINE_CFG["time_before_invisible"])
+
+
+class Boom(pg.sprite.Sprite):
+    def __init__(self):
+        super().__init__(all_sprites)
+
+
+
 class MapBoard:
     def __init__(self, width, height, left=50, top=50, cell_size=50, color=pg.Color("#1F2310")):
         self.width = width
@@ -618,6 +641,10 @@ class MapBoard:
                     ClassicTankBot(*self.get_cell_center(j, i), player_group, enemies_group)
                 elif elem == "2":
                     ClassicTankBot(*self.get_cell_center(j, i), enemies_group, player_group)
+                elif elem == "3":
+                    Mine(*self.get_cell_center(j, i), player_group, enemies_group)
+                elif elem == "4":
+                    Mine(*self.get_cell_center(j, i), enemies_group, player_group)
         self.board = level_map
         return level_name, player_pos
 

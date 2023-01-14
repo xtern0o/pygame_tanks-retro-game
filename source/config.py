@@ -23,3 +23,8 @@ BOOSTERS_CFG = {
     "ab_time": 600,
     "time_before_remove": 1200
 }
+MINE_CFG = {
+    "boom_rad": 30,
+    "time_before_invisible": 5,
+    "damage": 60
+}

@@ -9,28 +9,16 @@ pg.init()
 
 pg.display.set_caption("Tanks Retro Game")
 
-# map_board = MapBoard(16, 10)
-# player = ClassicTankPlayer(30, 30)
-# enemybot = ClassicTankBot(500, 500, enemies_group, player_group, speed=2)
-# teammatebot = ClassicTankBot(200, 50, player_group, enemies_group)
-# wall1 = BrickWall(*map_board.get_cell_center(2, 5))
-# wall2 = BrickWall(*map_board.get_cell_center(2, 6))
-# wall3 = BrickWall(*map_board.get_cell_center(3, 5))
-# wall4 = BrickWall(*map_board.get_cell_center(5, 5))
-# dambooster = DamageBooster(*map_board.get_cell_center(9, 1))
-# spebooster = SpeedBooster(*map_board.get_cell_center(10, 1))
-# armbooster = ArmorBooster(*map_board.get_cell_center(11, 1))
-# heabooster = HealthBooster(*map_board.get_cell_center(12, 1))
-
 map_board = MapBoard(16, 10)
 
+level_name_rect = pg.Rect(pg.Rect(50 * (1 + 5), 10, 400, 30))
 levels_folder = os.listdir("source/data/levels")
 for level_file in levels_folder:
     with open("source/data/levels/" + level_file, mode="r", encoding="utf-8") as file:
         level_info = file.readlines()
     level_name, player_pos = map_board.genereate_level(level_info)
 
-    player = ClassicTankPlayer(*player_pos)
+    player = ClassicTankPlayer(*map_board.get_cell_center(*player_pos))
     interface = InterfaceForClassicTank(player)
     clock = pg.time.Clock()
 
@@ -46,14 +34,19 @@ for level_file in levels_folder:
                 for tank in tanks_group.sprites():
                     if tank.rect.left <= x <= tank.rect.right and tank.rect.top <= y <= tank.rect.bottom:
                         interface = InterfaceForClassicTank(tank)
-                        for _ in range(30):
+                        for _ in range(10):
                             FlyingParticle((x, y), load_image("fire_particle.png"), 1,
                                            (random.randint(-5, 6), random.randint(-5, 6)))
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_c:
                     # next level
                     level_go = False
+                    for sprite in all_sprites:
+                        sprite.kill()
 
+        pg.draw.rect(screen, SOFT_GOLD, level_name_rect, border_radius=3)
+        font = InterfaceForClassicTank.font
+        screen.blit(font.render(level_name[:-1], True, BLACK), level_name_rect)
 
         map_board.render(screen)
 
