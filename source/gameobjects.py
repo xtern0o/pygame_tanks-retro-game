@@ -583,7 +583,7 @@ class MapBoard:
     def __init__(self, width, height, left=50, top=50, cell_size=50, color=pg.Color("#1F2310")):
         self.width = width
         self.height = height
-        self.board = [[random.randint(0, 1) for _ in range(width)] for __ in range(height)]
+        self.board = [["" for _ in range(width)] for __ in range(height)]
         self.left = left
         self.top = top
         self.cell_size = cell_size
@@ -604,6 +604,22 @@ class MapBoard:
         """Метод, возвращающий центр клетки координат (x, y) на карте"""
         return (self.left + self.cell_size // 2 + x * self.cell_size,
                 self.top + self.cell_size // 2 + y * self.cell_size)
+
+    def genereate_level(self, level):
+        """Метод, принимающий информацию об уровне генерирует его в игре и возвращает необх. информацию"""
+        level_name = str(level[0])
+        level_map = level[1:-1]
+        player_pos = list(map(int, level[-1].split()))
+        for i, row in enumerate(level_map):
+            for j, elem in enumerate(row):
+                if elem == '#':
+                    BrickWall(*self.get_cell_center(j, i))
+                elif elem == "1":
+                    ClassicTankBot(*self.get_cell_center(j, i), player_group, enemies_group)
+                elif elem == "2":
+                    ClassicTankBot(*self.get_cell_center(j, i), enemies_group, player_group)
+        self.board = level_map
+        return level_name, player_pos
 
 
 # Интерфейс
