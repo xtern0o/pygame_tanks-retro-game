@@ -6,17 +6,19 @@ from source.functions import terminate
 
 pg.init()
 
-
 pg.display.set_caption("Tanks Retro Game")
 
 map_board = MapBoard(16, 10)
 
-level_name_rect = pg.Rect(pg.Rect(50 * (1 + 5), 10, 400, 30))
+level_rect = pg.Rect(pg.Rect(0, 10, 900, 20))
+level_name_rect = pg.Rect(pg.Rect(10, 10, 900, 20))
 levels_folder = os.listdir("source/data/levels")
-for level_file in levels_folder:
+for i, level_file in enumerate(levels_folder):
     with open("source/data/levels/" + level_file, mode="r", encoding="utf-8") as file:
         level_info = file.readlines()
     level_name, player_pos = map_board.genereate_level(level_info)
+    level_name = level_name[:-1]
+    level_name += " [{} / {}]]".format(i + 1, len(levels_folder))
 
     player = ClassicTankPlayer(*map_board.get_cell_center(*player_pos))
     interface = InterfaceForClassicTank(player)
@@ -44,7 +46,7 @@ for level_file in levels_folder:
                     for sprite in all_sprites:
                         sprite.kill()
 
-        pg.draw.rect(screen, SOFT_GOLD, level_name_rect, border_radius=3)
+        pg.draw.rect(screen, SOFT_GOLD, level_rect, border_radius=3)
         font = InterfaceForClassicTank.font
         screen.blit(font.render(level_name[:-1], True, BLACK), level_name_rect)
 

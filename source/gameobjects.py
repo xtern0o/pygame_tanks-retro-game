@@ -600,8 +600,6 @@ class Boom(pg.sprite.Sprite):
     def __init__(self):
         super().__init__(all_sprites)
 
-
-
 class MapBoard:
     def __init__(self, width, height, left=50, top=50, cell_size=50, color=pg.Color("#1F2310")):
         self.width = width
