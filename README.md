@@ -23,3 +23,5 @@
 > 2) Реализовать механику режима CTF (capture the flag)
 > 3) Разработать класс `Mine` (мина, при наезде на которую у танка в зависимости от команды снимается определенное количество очков здоровья
 
+# Презентация
+https://docs.google.com/presentation/d/1kBx29MD0uOMik2gyq74IFha9ZVV6Js12w2sjnJeTusE/edit?usp=sharing
