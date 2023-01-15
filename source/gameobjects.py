@@ -17,6 +17,7 @@ bullet_group = pg.sprite.Group()    # ClassicBullet
 booster_group = pg.sprite.Group()   # Booster
 mine_group = pg.sprite.Group()      # Mine
 border_group = pg.sprite.Group()    # Border
+bash_group = pg.sprite.Group()      # Bash
 
 images = {
     "classic_tank_up": load_image("classic_tank.png"),
@@ -62,6 +63,8 @@ class ClassicTank(pg.sprite.Sprite):
         self.killed = False
         self.score = 0
 
+        self.in_bush = False
+
         self.enemy_group = enemy_group
         self.group = group
 
@@ -99,14 +102,15 @@ class ClassicTank(pg.sprite.Sprite):
             color = ORANGE
         else:
             color = RED
-        pg.draw.rect(screen, color, pg.Rect(self.rect.left - 5, self.rect.top - 20, 50, 10), width=2)
-        if not self.boosters_activated[ARMOR_BOOSTER]:
-            pg.draw.rect(screen, color,
-                         pg.Rect(self.rect.left - 5, self.rect.top - 20, 50 * self.hp // CLASSIC_TANK_CFG["hp"], 10))
-        else:
-            pg.draw.rect(screen, color,
-                         pg.Rect(self.rect.left - 5, self.rect.top - 20, 50 * self.hp // (CLASSIC_TANK_CFG["hp"] * 2),
-                                 10))
+        if not self.in_bush:
+            pg.draw.rect(screen, color, pg.Rect(self.rect.left - 5, self.rect.top - 20, 50, 10), width=2)
+            if not self.boosters_activated[ARMOR_BOOSTER]:
+                pg.draw.rect(screen, color,
+                             pg.Rect(self.rect.left - 5, self.rect.top - 20, 50 * self.hp // CLASSIC_TANK_CFG["hp"], 10))
+            else:
+                pg.draw.rect(screen, color,
+                             pg.Rect(self.rect.left - 5, self.rect.top - 20, 50 * self.hp // (CLASSIC_TANK_CFG["hp"] * 2),
+                                     10))
 
         if self.hp <= 0:
             self.kill_tank()
@@ -130,12 +134,19 @@ class ClassicTank(pg.sprite.Sprite):
                 to_pop.append(booster)
             else:
                 self.boosters[booster] -= 1
-
         for booster_to_pop in to_pop:
             self.boosters.pop(booster_to_pop)
-
         if self.boosters_activated[SPEED_BOOSTER]:
             pass
+
+        if pg.sprite.spritecollideany(self, bash_group):
+            self.in_bush = True
+        else:
+            self.in_bush = False
+        if self.in_bush:
+            self.image.set_alpha(0)
+        else:
+            self.image.set_alpha(255)
 
     def kill_tank(self):
         particle_count = 5
@@ -520,6 +531,17 @@ class BrickWall(pg.sprite.Sprite):
         self.kill()
 
 
+class Bush(pg.sprite.Sprite):
+    def __init__(self, pos_x, pos_y):
+        super().__init__(all_sprites, bash_group)
+        self.image = load_image("kust.png")
+        self.rect = self.image.get_rect()
+        self.rect.center = pos_x, pos_y
+
+    def update(self):
+        pass
+
+
 class Booster(pg.sprite.Sprite):
     activation_sound = pg.mixer.Sound("source/data/sounds/activation.mp3")
 
@@ -643,6 +665,8 @@ class MapBoard:
                     Mine(*self.get_cell_center(j, i), player_group, enemies_group)
                 elif elem == "4":
                     Mine(*self.get_cell_center(j, i), enemies_group, player_group)
+                elif elem == '%':
+                    Bush(*self.get_cell_center(j, i))
         self.board = level_map
         return level_name, player_pos
 
@@ -669,7 +693,8 @@ class InterfaceForClassicTank:
         self.score_rect = pg.Rect(50, 570, 100, 30)
 
     def update(self):
-        pg.draw.circle(screen, GRAY, self.tank.rect.center, radius=20, width=5)
+        if not self.tank.in_bush:
+            pg.draw.circle(screen, GRAY, self.tank.rect.center, radius=20, width=5)
 
         pg.draw.rect(screen, SOFT_GOLD, pg.Rect(50 * (1 + 5), 600, 400, 30), border_radius=5, width=3)
         pg.draw.rect(screen, DARKRED, pg.Rect(50 * (1 + 5), 640, 400, 15), border_radius=3, width=2)
