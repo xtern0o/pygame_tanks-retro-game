@@ -6,7 +6,8 @@ CLASSIC_TANK_CFG = {
     "hp": 100,
     "reload": 1.5,
     "fire_distance": 500,
-    "mines_count": 3
+    "mines_count": 3,
+    "mine_reload": 7
 }
 ARTILLERY_CFG = {
     "speed": 1,

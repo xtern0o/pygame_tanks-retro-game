@@ -66,6 +66,9 @@ class ClassicTank(pg.sprite.Sprite):
         self.score = 0
 
         self.mines_count = CLASSIC_TANK_CFG["mines_count"]
+        self.mine_reload = CLASSIC_TANK_CFG["mine_reload"] * FPS
+        self.mine_reloaded = True
+        self.mine_reload_timer = 0
 
         self.in_bush = False
 
@@ -152,6 +155,13 @@ class ClassicTank(pg.sprite.Sprite):
         else:
             self.image.set_alpha(255)
 
+        if not self.mine_reloaded:
+            if self.mine_reload_timer < self.mine_reload:
+                self.mine_reload_timer += 1
+            else:
+                self.mine_reload_timer = 0
+                self.mine_reloaded = True
+
     def kill_tank(self):
         particle_count = 5
         velocities_x = range(-5, 6)
@@ -184,9 +194,11 @@ class ClassicTank(pg.sprite.Sprite):
                     self.hp = CLASSIC_TANK_CFG["hp"]
 
     def place_mine(self):
-        if self.mines_count:
+        if self.mines_count and self.mine_reloaded:
             Mine(*self.rect.center, self.group, self.enemy_group)
             self.mines_count -= 1
+            self.mine_reloaded = False
+
 
 class ClassicTankPlayer(ClassicTank):
     def __init__(self, pos_x, pos_y):
@@ -372,24 +384,21 @@ class ClassicBullet(pg.sprite.Sprite):
             elif self.direction == DIRECTION_LEFT:
                 self.rect = self.rect.move(-self.speed, 0)
 
-            hits = pg.sprite.groupcollide(self.owner.enemy_group, bullet_group, False, True)
-            for tank in hits:
-                tank: ClassicTank
-                if self.owner.group != tank.group:
-                    tank.hp -= self.damage
-                    ClassicBullet.tank_hit_sound.play()
-                    ParticleHitTank(self.rect.center, self.damage)
-                    if tank.hp - self.damage <= 0:
-                        self.owner.score += 50
-                    else:
-                        self.owner.score += 10
+            if tank := pg.sprite.spritecollideany(self, self.owner.enemy_group):
+                tank.hp -= self.damage
+                ClassicBullet.tank_hit_sound.play()
+                ParticleHitTank(self.rect.center, self.damage)
+                if tank.hp - self.damage <= 0:
+                    self.owner.score += 50
+                else:
+                    self.owner.score += 10
+                self.kill()
 
-            hits = pg.sprite.groupcollide(wall_group, bullet_group, False, True)
-            for wall in hits:
-                wall: BrickWall
+            if wall := pg.sprite.spritecollideany(self, wall_group):
                 wall.hp -= self.damage
-
                 ParticleHitBrick(self.rect.center, random.choice(range(-5, 6)), random.choice(range(-20, -10)))
+                self.kill()
+
             ClassicBulletParticle(self)
         else:
             for _ in range(20):
@@ -631,9 +640,9 @@ class Mine(pg.sprite.Sprite):
         if self.time_before_invisible > 0:
             self.time_before_invisible -= 1
             self.image.set_alpha(255 * self.time_before_invisible / MINE_CFG["time_before_invisible"])
-        for tank in pg.sprite.groupcollide(self.enemy, mine_group, False, True):
-            tank: ClassicTank
+        if tank := pg.sprite.spritecollideany(self, self.enemy):
             tank.hp -= self.damage
+            self.kill()
             for _ in range(30):
                 FlyingParticle(self.rect.center, load_image("fire_particle.png"), 1,
                                (random.randint(-5, 6), random.randint(-5, 6)))
@@ -746,6 +755,13 @@ class InterfaceForClassicTank:
                                                             True, YELLOW), self.reload_rect)
         else:
             pg.draw.rect(screen, YELLOW, pg.Rect(50 * (1 + 5), 665, 400, 15), border_radius=3)
+
+        if self.tank.mines_count:
+            if not self.tank.mine_reloaded:
+                pg.draw.rect(screen, DARKGREEN, pg.Rect(50 * (1 + 11) + 10,
+                        610, 80 * self.tank.mine_reload_timer // self.tank.mine_reload, 10), border_radius=3)
+            else:
+                pg.draw.rect(screen, DARKGREEN, pg.Rect(50 * (1 + 11) + 10, 610, 80, 10), border_radius=3)
 
         for rect in [self.sp_b_rect, self.ar_b_rect, self.dd_b_rect, self.mine_rect]:
             pg.draw.rect(screen, GRAY, rect, width=2, border_radius=3)

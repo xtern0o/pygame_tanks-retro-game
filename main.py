@@ -38,7 +38,7 @@ startscreen()
 
 map_board = MapBoard(16, 10)
 
-level_rect = pg.Rect(pg.Rect(0, 10, 900, 20))
+level_rect = pg.Rect(pg.Rect(10, 5, 880, 30))
 level_name_rect = pg.Rect(pg.Rect(10, 10, 900, 20))
 levels_folder = os.listdir("source/data/levels")
 for i, level_file in enumerate(levels_folder):
@@ -73,7 +73,7 @@ for i, level_file in enumerate(levels_folder):
                     for sprite in all_sprites:
                         sprite.kill()
 
-        pg.draw.rect(screen, SOFT_GOLD, level_rect, border_radius=3)
+        pg.draw.rect(screen, SOFT_GOLD, level_rect, border_radius=4)
         font = InterfaceForClassicTank.font
         screen.blit(font.render(level_name[:-1], True, BLACK), level_name_rect)
 
