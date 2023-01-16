@@ -587,12 +587,10 @@ class Booster(pg.sprite.Sprite):
             hp_text = self.font.render(str(self.time_before_remove), True, SOFT_GOLD)
             screen.blit(hp_text, self.hp_rect)
             self.time_before_remove -= 1
-            collides = pg.sprite.groupcollide(tanks_group, booster_group, False, True)
-            for tank in collides:
-                tank: ClassicTank
+            if tank := pg.sprite.spritecollideany(self, tanks_group):
                 Booster.activation_sound.play()
                 tank.activate_booster(self)
-                print(self.booster_type)
+                self.kill()
         else:
             self.image.set_alpha(255 * self.time_to_fly // 120)
             self.rect = self.rect.move(0, -1)
@@ -663,6 +661,10 @@ class MapBoard:
         self.left = left
         self.top = top
         self.cell_size = cell_size
+
+    def get_board(self):
+        print(self.board)
+        return self.board
 
     def render(self, screen):
         for y in range(self.height):

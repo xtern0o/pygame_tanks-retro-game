@@ -3,6 +3,8 @@ import pygame as pg
 SIZE = W, H = 900, 700
 FPS = 60
 
+BOOSTER_SPAWN = pg.USEREVENT + 1
+
 DIRECTION_UP = "_up"
 DIRECTION_DOWN = "_down"
 DIRECTION_RIGHT = "_right"

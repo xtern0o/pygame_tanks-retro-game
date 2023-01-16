@@ -31,3 +31,6 @@ MINE_CFG = {
     "time_before_invisible": 5,
     "damage": 60
 }
+GLOBAL_CFG = {
+    "booster_spawn_frequency": 10
+}

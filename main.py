@@ -1,4 +1,5 @@
 import os
+import random
 
 from source.gameobjects import *
 from source.functions import terminate
@@ -51,11 +52,29 @@ for i, level_file in enumerate(levels_folder):
     player = ClassicTankPlayer(*map_board.get_cell_center(*player_pos))
     interface = InterfaceForClassicTank(player)
 
+    pg.time.set_timer(BOOSTER_SPAWN, GLOBAL_CFG["booster_spawn_frequency"] * 1000)
+
     level_run = True
     while level_run:
         screen.fill(BLACK)
         clock.tick(FPS)
         for event in pg.event.get():
+            if event.type == BOOSTER_SPAWN:
+                while True:
+                    x, y = random.randint(0, 15), random.randint(0, 9)
+                    print(x, y)
+                    if map_board.get_board()[y][x] not in ('#', '%', '1', '2', '3', '4'):
+                        b = random.randint(0, 4)
+                        if b == 0:
+                            SpeedBooster(*map_board.get_cell_center(x, y))
+                        elif b == 1:
+                            DamageBooster(*map_board.get_cell_center(x, y))
+                        elif b == 2:
+                            ArmorBooster(*map_board.get_cell_center(x, y))
+                        else:
+                            HealthBooster(*map_board.get_cell_center(x, y))
+                        break
+
             if event.type == pg.QUIT:
                 terminate()
             if event.type == pg.MOUSEBUTTONDOWN:
