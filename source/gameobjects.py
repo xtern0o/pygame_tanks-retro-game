@@ -87,7 +87,8 @@ class ClassicTank(pg.sprite.Sprite):
         self.fire_distance = CLASSIC_TANK_CFG["fire_distance"]
 
         self.image = images["classic_tank" + self.direction]
-        self.rect = self.image.get_rect().move(pos_x, pos_y)
+        self.rect = self.image.get_rect()
+        self.rect.center = pos_x, pos_y
 
         self.boosters = {}
         self.boosters_activated = {SPEED_BOOSTER: False,
