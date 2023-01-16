@@ -1,10 +1,12 @@
-NICKNAME = "PlayerName"
+NICKNAME1 = "PlayerName1"
+NICKNAME2 = "PlayerName2"
 CLASSIC_TANK_CFG = {
     "speed": 3,
     "damage": 10,
     "hp": 100,
     "reload": 1.5,
-    "fire_distance": 500
+    "fire_distance": 500,
+    "mines_count": 3
 }
 ARTILLERY_CFG = {
     "speed": 1,
@@ -24,7 +26,7 @@ BOOSTERS_CFG = {
     "time_before_remove": 1200
 }
 MINE_CFG = {
-    "boom_rad": 30,
+    "boom_rad": 60,
     "time_before_invisible": 5,
     "damage": 60
 }

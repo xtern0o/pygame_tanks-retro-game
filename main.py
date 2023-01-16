@@ -6,7 +6,35 @@ from source.functions import terminate
 
 pg.init()
 
+
+def startscreen():
+    while True:
+        screen.blit(pg.transform.scale(load_image("startscreen.png"), (W, H)), pg.Rect(0, 0, W, H))
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                terminate()
+            if event.type in (pg.MOUSEBUTTONDOWN, pg.KEYDOWN):
+                return None
+        pg.display.flip()
+        clock.tick(FPS)
+
+
+def next_level_screen():
+    while True:
+        screen.blit(pg.transform.scale(load_image("next_map_screen.png"), (W, H)), pg.Rect(0, 0, W, H))
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                terminate()
+            if event.type in (pg.MOUSEBUTTONDOWN, pg.KEYDOWN):
+                return None
+        pg.display.flip()
+        clock.tick(FPS)
+
+
 pg.display.set_caption("Tanks Retro Game")
+
+clock = pg.time.Clock()
+startscreen()
 
 map_board = MapBoard(16, 10)
 
@@ -22,10 +50,9 @@ for i, level_file in enumerate(levels_folder):
 
     player = ClassicTankPlayer(*map_board.get_cell_center(*player_pos))
     interface = InterfaceForClassicTank(player)
-    clock = pg.time.Clock()
 
-    level_go = True
-    while level_go:
+    level_run = True
+    while level_run:
         screen.fill(BLACK)
         clock.tick(FPS)
         for event in pg.event.get():
@@ -41,8 +68,8 @@ for i, level_file in enumerate(levels_folder):
                                            (random.randint(-5, 6), random.randint(-5, 6)))
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_c:
-                    # next level
-                    level_go = False
+                    next_level_screen()
+                    level_run = False
                     for sprite in all_sprites:
                         sprite.kill()
 
@@ -56,6 +83,9 @@ for i, level_file in enumerate(levels_folder):
         if keys_pressed[pg.K_ESCAPE]:
             terminate()
         player.update(keys_pressed)
+
+        if player.killed:
+            pass
 
         interface.update()
         all_sprites.draw(screen)

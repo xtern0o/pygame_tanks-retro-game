@@ -18,6 +18,7 @@ booster_group = pg.sprite.Group()   # Booster
 mine_group = pg.sprite.Group()      # Mine
 border_group = pg.sprite.Group()    # Border
 bash_group = pg.sprite.Group()      # Bash
+boom_group = pg.sprite.Group()      # Boom
 
 images = {
     "classic_tank_up": load_image("classic_tank.png"),
@@ -43,7 +44,8 @@ images = {
     "artillery_up": load_image("artillery_tank.png"),
     "artillery_down": pg.transform.flip(load_image("artillery_tank.png"), False, True),
     "artillery_right": pg.transform.rotate(load_image("artillery_tank.png"), 90),
-    "artillery_left": pg.transform.rotate(load_image("artillery_tank.png"), -90)
+    "artillery_left": pg.transform.rotate(load_image("artillery_tank.png"), -90),
+
 }
 screen = pg.display.set_mode(SIZE)
 screen.fill(BLACK)
@@ -62,6 +64,8 @@ class ClassicTank(pg.sprite.Sprite):
         self.objectname = "ClassicTank"
         self.killed = False
         self.score = 0
+
+        self.mines_count = CLASSIC_TANK_CFG["mines_count"]
 
         self.in_bush = False
 
@@ -179,12 +183,16 @@ class ClassicTank(pg.sprite.Sprite):
                 if self.hp > CLASSIC_TANK_CFG["hp"]:
                     self.hp = CLASSIC_TANK_CFG["hp"]
 
+    def place_mine(self):
+        if self.mines_count:
+            Mine(*self.rect.center, self.group, self.enemy_group)
+            self.mines_count -= 1
 
 class ClassicTankPlayer(ClassicTank):
     def __init__(self, pos_x, pos_y):
         super().__init__(pos_x, pos_y, player_group, enemies_group)
 
-        self.objectname = NICKNAME
+        self.objectname = NICKNAME1
 
     def update(self, *args):
         if not self.killed:
@@ -215,6 +223,9 @@ class ClassicTankPlayer(ClassicTank):
                         self.rect = self.rect.move(-self.speed, 0)
                 self.image = images["classic_tank" + self.direction]
                 self.image.get_rect().center = self.rect.center
+
+                if args[0][pg.K_m] or args[0][pg.K_r]:
+                    self.place_mine()
         else:
             pass
 
@@ -312,7 +323,7 @@ class ArtilleryPlayer(pg.sprite.Sprite):
         self.image = images["artillery" + self.direction]
         self.rect = self.image.get_rect().move(pos_x, pos_y)
 
-        self.objectname = NICKNAME
+        self.objectname = NICKNAME1
         self.killed = False
 
         self.speed = ARTILLERY_CFG["speed"]
@@ -322,7 +333,6 @@ class ArtilleryPlayer(pg.sprite.Sprite):
         self.reload_timer = 0
         self.is_reloaded = True
         self.fire_distance = CLASSIC_TANK_CFG["fire_distance"]
-
 
     def update(self):
         pass
@@ -369,6 +379,10 @@ class ClassicBullet(pg.sprite.Sprite):
                     tank.hp -= self.damage
                     ClassicBullet.tank_hit_sound.play()
                     ParticleHitTank(self.rect.center, self.damage)
+                    if tank.hp - self.damage <= 0:
+                        self.owner.score += 50
+                    else:
+                        self.owner.score += 10
 
             hits = pg.sprite.groupcollide(wall_group, bullet_group, False, True)
             for wall in hits:
@@ -611,16 +625,19 @@ class Mine(pg.sprite.Sprite):
         self.team = group
         self.enemy = group_to_kill
         self.time_before_invisible = MINE_CFG["time_before_invisible"] * FPS
+        self.damage = MINE_CFG["damage"]
 
     def update(self):
         if self.time_before_invisible > 0:
             self.time_before_invisible -= 1
             self.image.set_alpha(255 * self.time_before_invisible / MINE_CFG["time_before_invisible"])
+        for tank in pg.sprite.groupcollide(self.enemy, mine_group, False, True):
+            tank: ClassicTank
+            tank.hp -= self.damage
+            for _ in range(30):
+                FlyingParticle(self.rect.center, load_image("fire_particle.png"), 1,
+                               (random.randint(-5, 6), random.randint(-5, 6)))
 
-
-class Boom(pg.sprite.Sprite):
-    def __init__(self):
-        super().__init__(all_sprites)
 
 class MapBoard:
     def __init__(self, width, height, left=50, top=50, cell_size=50, color=pg.Color("#1F2310")):
