@@ -33,7 +33,6 @@ def next_level_screen():
 
 def spawn_random_booster():
     x, y = random.randint(0, 15), random.randint(0, 9)
-    print(x, y)
     if map_board.get_board()[y][x] not in ('#', '%', '1', '2', '3', '4'):
         b = random.randint(0, 4)
         if b == 0:

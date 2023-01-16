@@ -198,7 +198,7 @@ class ClassicTank(pg.sprite.Sprite):
 
     def place_mine(self):
         if self.mines_count and self.mine_reloaded:
-            Mine(*self.rect.center, self.group, self.enemy_group)
+            Mine(*self.rect.center, self.group, self.enemy_group, self)
             self.mines_count -= 1
             self.mine_reloaded = False
 
@@ -677,8 +677,12 @@ class HealthBooster(Booster):
 
 
 class Mine(pg.sprite.Sprite):
-    def __init__(self, pos_x, pos_y, group, group_to_kill):
+    explode = pg.mixer.Sound("source/data/sounds/mine_explode.mp3")
+    explode.set_volume(0.5)
+
+    def __init__(self, pos_x, pos_y, group, group_to_kill, parent=None):
         super().__init__(all_sprites, mine_group)
+        self.parent = parent
         self.image = load_image("mine.png")
         self.rect = self.image.get_rect()
         self.rect.center = pos_x, pos_y
@@ -694,6 +698,9 @@ class Mine(pg.sprite.Sprite):
             self.image.set_alpha(255 * self.time_before_invisible / MINE_CFG["time_before_invisible"])
         if tank := pg.sprite.spritecollideany(self, self.enemy):
             tank.hp -= self.damage
+            if self.parent:
+                self.parent.score += MINE_CFG["damage"]
+            Mine.explode.play()
             self.kill()
             for _ in range(30):
                 FlyingParticle(self.rect.center, load_image("fire_particle.png"), 1,
@@ -737,7 +744,6 @@ class MapBoard:
         if len(level) == 13:
             player1_pos = list(map(int, level[-2].split()))
             player2_pos = list(map(int, level[-1].split()))
-            print(player1_pos, player2_pos)
             level_map = level[1:-2]
         elif len(level) == 12:
             player1_pos = list(map(int, level[-1].split()))
@@ -796,6 +802,8 @@ class InterfaceForClassicTank:
         else:
             screen.blit(InterfaceForClassicTank.font.render(self.tank.objectname + " (killed)", True, DARKRED),
                         self.name_rect)
+
+        screen.blit(InterfaceForClassicTank.font.render("score: " + str(self.tank.score), True, SOFT_GOLD), self.score_rect)
 
         InterfaceForClassicTank.font.underline = False
         InterfaceForClassicTank.font.bold = False
