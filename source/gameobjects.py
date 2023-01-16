@@ -194,6 +194,7 @@ class ClassicTank(pg.sprite.Sprite):
             else:
                 if self.hp > CLASSIC_TANK_CFG["hp"]:
                     self.hp = CLASSIC_TANK_CFG["hp"]
+            HealingParticle(booster)
 
     def place_mine(self):
         if self.mines_count and self.mine_reloaded:
@@ -204,41 +205,106 @@ class ClassicTank(pg.sprite.Sprite):
 
 class ClassicTankPlayer(ClassicTank):
     def __init__(self, pos_x, pos_y):
-        super().__init__(pos_x, pos_y, player_group, enemies_group)
-
+        self.team = player_group
+        self.enemy = enemies_group
+        super().__init__(pos_x, pos_y, self.team, self.enemy)
         self.objectname = NICKNAME1
+        self.buttons = {
+            "_up": p1_up,
+            "_down": p1_down,
+            "_right": p1_right,
+            "_left": p1_left,
+            "_fire": p1_fire,
+            "_mine": p1_mine
+        }
 
     def update(self, *args):
         if not self.killed:
             super().update(*args)
             if args:
-                if args[0][pg.K_SPACE]:
+                if args[0][self.buttons["_fire"]]:
                     self.shoot()
 
-                if args[0][pg.K_UP] or args[0][pg.K_w]:
+                if args[0][self.buttons[DIRECTION_UP]]:
                     self.rect = self.rect.move(0, -self.speed)
                     self.direction = DIRECTION_UP
-                    if pg.sprite.spritecollideany(self, wall_group) or pg.sprite.spritecollideany(self, enemies_group):
+                    if pg.sprite.spritecollideany(self, wall_group) or pg.sprite.spritecollideany(self, self.enemy):
                         self.rect = self.rect.move(0, self.speed)
-                elif args[0][pg.K_DOWN] or args[0][pg.K_s]:
+                elif args[0][self.buttons[DIRECTION_DOWN]]:
                     self.rect = self.rect.move(0, self.speed)
                     self.direction = DIRECTION_DOWN
-                    if pg.sprite.spritecollideany(self, wall_group) or pg.sprite.spritecollideany(self, enemies_group):
+                    if pg.sprite.spritecollideany(self, wall_group) or pg.sprite.spritecollideany(self, self.enemy):
                         self.rect = self.rect.move(0, -self.speed)
-                elif args[0][pg.K_LEFT] or args[0][pg.K_a]:
+                elif args[0][self.buttons[DIRECTION_LEFT]]:
                     self.rect = self.rect.move(-self.speed, 0)
                     self.direction = DIRECTION_LEFT
-                    if pg.sprite.spritecollideany(self, wall_group) or pg.sprite.spritecollideany(self, enemies_group):
+                    if pg.sprite.spritecollideany(self, wall_group) or pg.sprite.spritecollideany(self, self.enemy):
                         self.rect = self.rect.move(self.speed, 0)
-                elif args[0][pg.K_RIGHT] or args[0][pg.K_d]:
+                elif args[0][self.buttons[DIRECTION_RIGHT]]:
                     self.rect = self.rect.move(self.speed, 0)
                     self.direction = DIRECTION_RIGHT
-                    if pg.sprite.spritecollideany(self, wall_group) or pg.sprite.spritecollideany(self, enemies_group):
+                    if pg.sprite.spritecollideany(self, wall_group) or pg.sprite.spritecollideany(self, self.enemy):
                         self.rect = self.rect.move(-self.speed, 0)
                 self.image = images["classic_tank" + self.direction]
                 self.image.get_rect().center = self.rect.center
 
-                if args[0][pg.K_m] or args[0][pg.K_r]:
+                if args[0][self.buttons["_mine"]]:
+                    self.place_mine()
+        else:
+            pass
+
+    def kill_tank(self):
+        super().kill_tank()
+        self.killed = True
+        pg.display.set_caption("GAME OVER")
+
+
+class ClassicTankSecondPlayer(ClassicTank):
+    def __init__(self, pos_x, pos_y):
+        self.team = enemies_group
+        self.enemy = player_group
+        super().__init__(pos_x, pos_y, self.team, self.enemy)
+        self.objectname = NICKNAME2
+        self.buttons = {
+            "_up": p2_up,
+            "_down": p2_down,
+            "_right": p2_right,
+            "_left": p2_left,
+            "_fire": p2_fire,
+            "_mine": p2_mine
+        }
+
+    def update(self, *args):
+        if not self.killed:
+            super().update(*args)
+            if args:
+                if args[0][self.buttons["_fire"]]:
+                    self.shoot()
+
+                if args[0][self.buttons[DIRECTION_UP]]:
+                    self.rect = self.rect.move(0, -self.speed)
+                    self.direction = DIRECTION_UP
+                    if pg.sprite.spritecollideany(self, wall_group) or pg.sprite.spritecollideany(self, self.enemy):
+                        self.rect = self.rect.move(0, self.speed)
+                elif args[0][self.buttons[DIRECTION_DOWN]]:
+                    self.rect = self.rect.move(0, self.speed)
+                    self.direction = DIRECTION_DOWN
+                    if pg.sprite.spritecollideany(self, wall_group) or pg.sprite.spritecollideany(self, self.enemy):
+                        self.rect = self.rect.move(0, -self.speed)
+                elif args[0][self.buttons[DIRECTION_LEFT]]:
+                    self.rect = self.rect.move(-self.speed, 0)
+                    self.direction = DIRECTION_LEFT
+                    if pg.sprite.spritecollideany(self, wall_group) or pg.sprite.spritecollideany(self, self.enemy):
+                        self.rect = self.rect.move(self.speed, 0)
+                elif args[0][self.buttons[DIRECTION_RIGHT]]:
+                    self.rect = self.rect.move(self.speed, 0)
+                    self.direction = DIRECTION_RIGHT
+                    if pg.sprite.spritecollideany(self, wall_group) or pg.sprite.spritecollideany(self, self.enemy):
+                        self.rect = self.rect.move(-self.speed, 0)
+                self.image = images["classic_tank" + self.direction]
+                self.image.get_rect().center = self.rect.center
+
+                if args[0][self.buttons["_mine"]]:
                     self.place_mine()
         else:
             pass
@@ -327,29 +393,6 @@ class ClassicTankBot(ClassicTank):
 
         self.image = images["classic_tank" + self.direction]
         self.image.get_rect().center = self.rect.center
-
-
-class ArtilleryPlayer(pg.sprite.Sprite):
-    def __init__(self, pos_x, pos_y, enemy_group):
-        super().__init__(all_sprites, tanks_group, player_group)
-        self.enemy_group = enemy_group
-        self.direction = DIRECTION_UP
-        self.image = images["artillery" + self.direction]
-        self.rect = self.image.get_rect().move(pos_x, pos_y)
-
-        self.objectname = NICKNAME1
-        self.killed = False
-
-        self.speed = ARTILLERY_CFG["speed"]
-        self.dmg = ARTILLERY_CFG["damage"]
-        self.reload = ARTILLERY_CFG["reload"]
-        self.reload *= FPS
-        self.reload_timer = 0
-        self.is_reloaded = True
-        self.fire_distance = CLASSIC_TANK_CFG["fire_distance"]
-
-    def update(self):
-        pass
 
 
 class ClassicBullet(pg.sprite.Sprite):
@@ -462,6 +505,12 @@ class ParticleHitTank(FlyingParticle):
         self.font = pg.font.Font(None, 40)
         hp_text = self.font.render("-" + str(damage), True, SOFT_GOLD)
         super().__init__(pos, hp_text, 1, (random.randint(-2, 3), random.randint(-2, 3)))
+
+
+class HealingParticle(FlyingParticle):
+    def __init__(self, hbooster):
+        txt = InterfaceForClassicTank.font.render("+" + str(BOOSTERS_CFG["hb_healing"]), True, GREEN)
+        super().__init__(hbooster.rect.center, txt, 1, (0, -2))
 
 
 class ParticleHitBrick(GravityParticle):
@@ -683,8 +732,16 @@ class MapBoard:
     def genereate_level(self, level):
         """Метод, принимающий информацию об уровне генерирует его в игре и возвращает необх. информацию"""
         level_name = str(level[0])
-        level_map = level[1:-1]
-        player_pos = list(map(int, level[-1].split()))
+
+        player1_pos, player2_pos = None, None
+        if len(level) == 13:
+            player1_pos = list(map(int, level[-2].split()))
+            player2_pos = list(map(int, level[-1].split()))
+            print(player1_pos, player2_pos)
+            level_map = level[1:-2]
+        elif len(level) == 12:
+            player1_pos = list(map(int, level[-1].split()))
+            level_map = level[1:-1]
         for i, row in enumerate(level_map):
             for j, elem in enumerate(row):
                 if elem == '#':
@@ -700,7 +757,7 @@ class MapBoard:
                 elif elem == '%':
                     Bush(*self.get_cell_center(j, i))
         self.board = level_map
-        return level_name, player_pos
+        return level_name, player1_pos, player2_pos
 
 
 # Интерфейс

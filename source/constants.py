@@ -28,3 +28,18 @@ DARKRED = pg.Color("darkred")
 BROWN = pg.Color("brown")
 GRAY = pg.Color("gray")
 DARKGRAY = pg.Color("darkgray")
+
+# Управление игроками
+p1_up = pg.K_UP
+p1_down = pg.K_DOWN
+p1_right = pg.K_RIGHT
+p1_left = pg.K_LEFT
+p1_fire = pg.K_SPACE
+p1_mine = pg.K_m
+
+p2_up = pg.K_w
+p2_down = pg.K_s
+p2_right = pg.K_d
+p2_left = pg.K_a
+p2_fire = pg.K_f
+p2_mine = pg.K_r

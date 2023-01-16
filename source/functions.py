@@ -15,3 +15,13 @@ def load_image(name):
 def terminate():
     pg.quit()
     sys.exit()
+
+
+# def level_validator(level):
+#     # кол-во строк
+#     if not 12 <= len(level) <= 13:
+#         return False
+#
+#     # кол-во элементов в строках
+#     for row in level[1:-1]:
+#         if len()

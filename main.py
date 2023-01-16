@@ -1,5 +1,4 @@
 import os
-import random
 
 from source.gameobjects import *
 from source.functions import terminate
@@ -57,16 +56,22 @@ startscreen()
 map_board = MapBoard(16, 10)
 
 level_rect = pg.Rect(pg.Rect(10, 5, 880, 30))
-level_name_rect = pg.Rect(pg.Rect(10, 10, 900, 20))
+level_name_rect = pg.Rect(pg.Rect(30, 10, 900, 20))
 levels_folder = os.listdir("source/data/levels")
 for i, level_file in enumerate(levels_folder):
     with open("source/data/levels/" + level_file, mode="r", encoding="utf-8") as file:
         level_info = file.readlines()
-    level_name, player_pos = map_board.genereate_level(level_info)
+    level_name, player1_pos, player2_pos = map_board.genereate_level(level_info)
     level_name = level_name[:-1]
     level_name += " [{} / {}]]".format(i + 1, len(levels_folder))
 
-    player = ClassicTankPlayer(*map_board.get_cell_center(*player_pos))
+    if not player2_pos:
+        player = ClassicTankPlayer(*map_board.get_cell_center(*player1_pos))
+        twoplayers_mode = False
+    else:
+        player1 = ClassicTankPlayer(*map_board.get_cell_center(*player1_pos))
+        player2 = ClassicTankSecondPlayer(*map_board.get_cell_center(*player2_pos))
+        twoplayers_mode = True
     interface = InterfaceForClassicTank(player)
 
     pg.time.set_timer(BOOSTER_SPAWN, GLOBAL_CFG["booster_spawn_frequency"] * 1000)
@@ -105,10 +110,13 @@ for i, level_file in enumerate(levels_folder):
         keys_pressed = pg.key.get_pressed()
         if keys_pressed[pg.K_ESCAPE]:
             terminate()
-        player.update(keys_pressed)
-
-        if player.killed:
-            pass
+        if not twoplayers_mode:
+            player.update(keys_pressed)
+            if player.killed:
+                pass
+        else:
+            player1.update(keys_pressed)
+            player2.update(keys_pressed)
 
         interface.update()
         all_sprites.draw(screen)
