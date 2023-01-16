@@ -1,5 +1,6 @@
 import pygame as pg
 import random
+from math import sin
 
 from source.functions import load_image
 from source.config import *
@@ -582,6 +583,8 @@ class Booster(pg.sprite.Sprite):
         self.hp_rect = self.rect.copy().move(0, -20)
         self.time_to_fly = 120
 
+        self.first_centery = self.rect.centery
+
     def update(self):
         if self.time_before_remove:
             hp_text = self.font.render(str(self.time_before_remove), True, SOFT_GOLD)
@@ -591,6 +594,7 @@ class Booster(pg.sprite.Sprite):
                 Booster.activation_sound.play()
                 tank.activate_booster(self)
                 self.kill()
+            self.rect.centery = self.first_centery + int(sin(self.time_before_remove / 16) * 10)
         else:
             self.image.set_alpha(255 * self.time_to_fly // 120)
             self.rect = self.rect.move(0, -1)
@@ -663,7 +667,6 @@ class MapBoard:
         self.cell_size = cell_size
 
     def get_board(self):
-        print(self.board)
         return self.board
 
     def render(self, screen):

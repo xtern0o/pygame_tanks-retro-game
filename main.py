@@ -32,6 +32,23 @@ def next_level_screen():
         clock.tick(FPS)
 
 
+def spawn_random_booster():
+    x, y = random.randint(0, 15), random.randint(0, 9)
+    print(x, y)
+    if map_board.get_board()[y][x] not in ('#', '%', '1', '2', '3', '4'):
+        b = random.randint(0, 4)
+        if b == 0:
+            SpeedBooster(*map_board.get_cell_center(x, y))
+        elif b == 1:
+            DamageBooster(*map_board.get_cell_center(x, y))
+        elif b == 2:
+            ArmorBooster(*map_board.get_cell_center(x, y))
+        else:
+            HealthBooster(*map_board.get_cell_center(x, y))
+        return None
+    spawn_random_booster()
+
+
 pg.display.set_caption("Tanks Retro Game")
 
 clock = pg.time.Clock()
@@ -60,20 +77,7 @@ for i, level_file in enumerate(levels_folder):
         clock.tick(FPS)
         for event in pg.event.get():
             if event.type == BOOSTER_SPAWN:
-                while True:
-                    x, y = random.randint(0, 15), random.randint(0, 9)
-                    print(x, y)
-                    if map_board.get_board()[y][x] not in ('#', '%', '1', '2', '3', '4'):
-                        b = random.randint(0, 4)
-                        if b == 0:
-                            SpeedBooster(*map_board.get_cell_center(x, y))
-                        elif b == 1:
-                            DamageBooster(*map_board.get_cell_center(x, y))
-                        elif b == 2:
-                            ArmorBooster(*map_board.get_cell_center(x, y))
-                        else:
-                            HealthBooster(*map_board.get_cell_center(x, y))
-                        break
+                spawn_random_booster()
 
             if event.type == pg.QUIT:
                 terminate()
