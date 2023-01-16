@@ -66,12 +66,13 @@ for i, level_file in enumerate(levels_folder):
 
     if not player2_pos:
         player = ClassicTankPlayer(*map_board.get_cell_center(*player1_pos))
+        interface = InterfaceForClassicTank(player)
         twoplayers_mode = False
     else:
         player1 = ClassicTankPlayer(*map_board.get_cell_center(*player1_pos))
         player2 = ClassicTankSecondPlayer(*map_board.get_cell_center(*player2_pos))
+        interface = InterfaceForClassicTank(player1)
         twoplayers_mode = True
-    interface = InterfaceForClassicTank(player)
 
     pg.time.set_timer(BOOSTER_SPAWN, GLOBAL_CFG["booster_spawn_frequency"] * 1000)
 
