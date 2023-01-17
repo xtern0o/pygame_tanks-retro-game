@@ -6,20 +6,19 @@ from source.functions import *
 from source.config import *
 from source.constants import *
 
-
 pg.init()
 
 all_sprites = pg.sprite.Group()
-tanks_group = pg.sprite.Group()     # ClassicTank
-enemies_group = pg.sprite.Group()   # ClassicTankEnemy
-player_group = pg.sprite.Group()    # ClassicTankPlayer
-wall_group = pg.sprite.Group()      # BrickWall
-bullet_group = pg.sprite.Group()    # ClassicBullet
-booster_group = pg.sprite.Group()   # Booster
-mine_group = pg.sprite.Group()      # Mine
-border_group = pg.sprite.Group()    # Border
-bash_group = pg.sprite.Group()      # Bash
-boom_group = pg.sprite.Group()      # Boom
+tanks_group = pg.sprite.Group()  # ClassicTank
+enemies_group = pg.sprite.Group()  # ClassicTankEnemy
+player_group = pg.sprite.Group()  # ClassicTankPlayer
+wall_group = pg.sprite.Group()  # BrickWall
+bullet_group = pg.sprite.Group()  # ClassicBullet
+booster_group = pg.sprite.Group()  # Booster
+mine_group = pg.sprite.Group()  # Mine
+border_group = pg.sprite.Group()  # Border
+bash_group = pg.sprite.Group()  # Bash
+boom_group = pg.sprite.Group()  # Boom
 
 images = {
     "classic_tank_up": load_image("classic_tank.png"),
@@ -116,10 +115,12 @@ class ClassicTank(pg.sprite.Sprite):
             pg.draw.rect(screen, color, pg.Rect(self.rect.left - 5, self.rect.top - 20, 50, 10), width=2)
             if not self.boosters_activated[ARMOR_BOOSTER]:
                 pg.draw.rect(screen, color,
-                             pg.Rect(self.rect.left - 5, self.rect.top - 20, 50 * self.hp // CLASSIC_TANK_CFG["hp"], 10))
+                             pg.Rect(self.rect.left - 5, self.rect.top - 20, 50 * self.hp // CLASSIC_TANK_CFG["hp"],
+                                     10))
             else:
                 pg.draw.rect(screen, color,
-                             pg.Rect(self.rect.left - 5, self.rect.top - 20, 50 * self.hp // (CLASSIC_TANK_CFG["hp"] * 2),
+                             pg.Rect(self.rect.left - 5, self.rect.top - 20,
+                                     50 * self.hp // (CLASSIC_TANK_CFG["hp"] * 2),
                                      10))
 
         if self.hp <= 0:
@@ -808,14 +809,15 @@ class InterfaceForClassicTank:
             screen.blit(InterfaceForClassicTank.font.render(self.tank.objectname + " (killed)", True, DARKRED),
                         self.name_rect)
 
-        screen.blit(InterfaceForClassicTank.font.render("score: " + str(self.tank.score), True, SOFT_GOLD), self.score_rect)
+        screen.blit(InterfaceForClassicTank.font.render("score: " + str(self.tank.score), True, SOFT_GOLD),
+                    self.score_rect)
 
         InterfaceForClassicTank.font.underline = False
         InterfaceForClassicTank.font.bold = False
 
         if not self.tank.boosters_activated[ARMOR_BOOSTER]:
             pg.draw.rect(screen, DARKRED, pg.Rect(50 * (1 + 5), 640, 400 * self.tank.hp // CLASSIC_TANK_CFG["hp"], 15),
-                    border_radius=3)
+                         border_radius=3)
             screen.blit(InterfaceForClassicTank.font.render(f"{self.tank.hp} / {CLASSIC_TANK_CFG['hp']}",
                                                             True, DARKRED), self.hp_rect)
         else:
@@ -826,16 +828,18 @@ class InterfaceForClassicTank:
 
         if not self.tank.is_reloaded:
             pg.draw.rect(screen, YELLOW, pg.Rect(50 * (1 + 5), 665,
-                        400 * self.tank.reload_timer // self.tank.reload, 15), border_radius=3)
-            screen.blit(InterfaceForClassicTank.font.render(f"{((self.tank.reload - self.tank.reload_timer) / 60):0.2f}",
-                                                            True, YELLOW), self.reload_rect)
+                                                 400 * self.tank.reload_timer // self.tank.reload, 15), border_radius=3)
+            screen.blit(
+                InterfaceForClassicTank.font.render(f"{((self.tank.reload - self.tank.reload_timer) / 60):0.2f}",
+                                                    True, YELLOW), self.reload_rect)
         else:
             pg.draw.rect(screen, YELLOW, pg.Rect(50 * (1 + 5), 665, 400, 15), border_radius=3)
 
         if self.tank.mines_count:
             if not self.tank.mine_reloaded:
                 pg.draw.rect(screen, DARKGREEN, pg.Rect(50 * (1 + 11) + 10,
-                        610, 80 * self.tank.mine_reload_timer // self.tank.mine_reload, 10), border_radius=3)
+                                                        610, 80 * self.tank.mine_reload_timer // self.tank.mine_reload,
+                                                        10), border_radius=3)
             else:
                 pg.draw.rect(screen, DARKGREEN, pg.Rect(50 * (1 + 11) + 10, 610, 80, 10), border_radius=3)
 
