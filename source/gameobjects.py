@@ -166,6 +166,17 @@ class ClassicTank(pg.sprite.Sprite):
                 self.mine_reload_timer = 0
                 self.mine_reloaded = True
 
+        if pg.sprite.spritecollideany(self, border_group):
+            print("!")
+            if self.direction == DIRECTION_UP:
+                self.rect = self.rect.move(0, self.speed)
+            elif self.direction == DIRECTION_RIGHT:
+                self.rect = self.rect.move(-self.speed, 0)
+            elif self.direction == DIRECTION_DOWN:
+                self.rect = self.rect.move(0, -self.speed)
+            elif self.direction == DIRECTION_LEFT:
+                self.rect = self.rect.move(self.speed, 0)
+
     def kill_tank(self):
         particle_count = 5
         velocities_x = range(-5, 6)
@@ -859,3 +870,19 @@ class InterfaceForClassicTank:
                     self.distance_rect)
         screen.blit(InterfaceForClassicTank.font.render(f"Speed:      {self.tank.speed}", True, SOFT_GOLD),
                     self.speed_rect)
+
+
+class Border(pg.sprite.Sprite):
+    def __init__(self, type: bool, leftx, topy):
+        """type=True -- горизонтальная граница, type=False -- вертикальная"""
+        super().__init__(all_sprites, border_group)
+        if type:
+            self.image = pg.Surface((W, 1))
+            self.rect = pg.Rect(leftx, topy - 1, W, 1)
+        else:
+            self.image = pg.Surface((1, H))
+            self.rect = pg.Rect(leftx - 1, topy, 1, H)
+        self.image.set_alpha(0)
+
+    def update(self):
+        pass
