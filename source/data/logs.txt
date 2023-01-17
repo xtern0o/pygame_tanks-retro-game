@@ -22,3 +22,72 @@
 --- [2023, Jan 2] PlayerName1 выстрелил
 --- [2023, Jan 2] PlayerName1 выстрелил
 --- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName1 активировал бустер: ab
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName2 выстрелил
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName2 выстрелил
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName2 выстрелил
+--- [2023, Jan 2] PlayerName2 разместил мину по координатам (825, 492)
+--- [2023, Jan 2] PlayerName2 выстрелил
+--- [2023, Jan 2] PlayerName1 уничтожен
+========
+[!] | [2023, Jan 2] Результаты дуэли: PlayerName1 < PlayerName2
+========
+--- [2023, Jan 2] PlayerName1 разместил мину по координатам (513, 525)
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName1 разместил мину по координатам (414, 525)
+--- [2023, Jan 2] PlayerName1 активировал бустер: db
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName2 уничтожен
+========
+[!] | [2023, Jan 2] Результаты дуэли: PlayerName1 > PlayerName2
+========
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName2 выстрелил
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName2 выстрелил
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName2 выстрелил
+--- [2023, Jan 2] PlayerName2 разместил мину по координатам (783, 525)
+--- [2023, Jan 2] PlayerName1 активировал бустер: db
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName2 выстрелил
+--- [2023, Jan 2] PlayerName1 уничтожен
+========
+[!] | [2023, Jan 2] Результаты дуэли: PlayerName1 < PlayerName2
+========
+--- [2023, Jan 2] PlayerName1 выстрелил
+========
+[!] | [2023, Jan 2] СМЕНА КАРТЫ
+========
+--- [2023, Jan 2] bot выстрелил
+--- [2023, Jan 2] bot выстрелил
+========
+[!] | [2023, Jan 2] СМЕНА КАРТЫ
+========
