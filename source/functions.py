@@ -30,9 +30,12 @@ def log(strdata: str, small=None):
 
 def show_screen(filename: str, screen):
     clock = pg.time.Clock()
+    time = 0
     if filename != "error_screen.png":
         while True:
-            screen.blit(pg.transform.scale(load_image(filename), (W, H)), pg.Rect(0, 0, W, H))
+            im = load_image(filename)
+            im.set_alpha(255 * time // FPS // 2)
+            screen.blit(pg.transform.scale(im, (W, H)), pg.Rect(0, 0, W, H))
             for event in pg.event.get():
                 if event.type == pg.QUIT:
                     terminate()
@@ -43,6 +46,7 @@ def show_screen(filename: str, screen):
                         return None
             pg.display.flip()
             clock.tick(FPS)
+            time += 1
     else:
         while True:
             screen.blit(pg.transform.scale(load_image("error_screen.png"), (W, H)), pg.Rect(0, 0, W, H))
@@ -53,5 +57,3 @@ def show_screen(filename: str, screen):
                     terminate()
             pg.display.flip()
             clock.tick(FPS)
-
-

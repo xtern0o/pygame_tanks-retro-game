@@ -111,4 +111,4 @@ for i, level_file in enumerate(levels_folder):
 
         pg.display.flip()
 
-show_screen("end_screen.png")
+show_screen("end_screen.png", screen)

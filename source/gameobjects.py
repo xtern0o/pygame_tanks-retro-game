@@ -200,11 +200,12 @@ class ClassicTank(pg.sprite.Sprite):
             HealingParticle(booster)
 
     def place_mine(self):
-        log(f"{self.objectname} разместил мину по координатам ({self.rect.centerx}, {self.rect.centery})", small=True)
         if self.mines_count and self.mine_reloaded:
             Mine(*self.rect.center, self.group, self.enemy_group, self)
             self.mines_count -= 1
             self.mine_reloaded = False
+            log(f"{self.objectname} разместил мину по координатам ({self.rect.centerx}, {self.rect.centery})",
+                small=True)
 
 
 class ClassicTankPlayer(ClassicTank):
