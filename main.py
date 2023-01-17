@@ -28,10 +28,7 @@ show_screen("startscreen.png", screen)
 
 map_board = MapBoard(16, 10)
 
-border1 = Border(True, 0, 50)
-border2 = Border(True, 0, 550)
-border3 = Border(False, 50, 0)
-border4 = Border(False, 850, 0)
+
 
 level_rect = pg.Rect(pg.Rect(10, 5, 880, 30))
 level_name_rect = pg.Rect(pg.Rect(30, 10, 900, 20))
@@ -56,6 +53,11 @@ for i, level_file in enumerate(levels_folder):
     except Exception:
         show_screen("error_screen.png", screen)
         break
+
+    border1 = Border(True, 0, 50)
+    border2 = Border(True, 0, 550)
+    border3 = Border(False, 50, 0)
+    border4 = Border(False, 850, 0)
 
     pg.time.set_timer(BOOSTER_SPAWN, GLOBAL_CFG["booster_spawn_frequency"] * 1000)
 
