@@ -1,4 +1,5 @@
 import os
+import time
 
 from source.gameobjects import *
 from source.functions import terminate
@@ -15,6 +16,18 @@ def startscreen():
                 terminate()
             if event.type in (pg.MOUSEBUTTONDOWN, pg.KEYDOWN):
                 return None
+        pg.display.flip()
+        clock.tick(FPS)
+
+
+def errorscreen():
+    while True:
+        screen.blit(pg.transform.scale(load_image("error_screen.png"), (W, H)), pg.Rect(0, 0, W, H))
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                terminate()
+            if event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:
+                terminate()
         pg.display.flip()
         clock.tick(FPS)
 
@@ -60,19 +73,23 @@ levels_folder = os.listdir("source/data/levels")
 for i, level_file in enumerate(levels_folder):
     with open("source/data/levels/" + level_file, mode="r", encoding="utf-8") as file:
         level_info = file.readlines()
-    level_name, player1_pos, player2_pos = map_board.genereate_level(level_info)
-    level_name = level_name[:-1]
-    level_name += " [{} / {}]]".format(i + 1, len(levels_folder))
+    try:
+        level_name, player1_pos, player2_pos = map_board.genereate_level(level_info)
+        level_name = level_name[:-1]
+        level_name += " [{} / {}]]".format(i + 1, len(levels_folder))
 
-    if not player2_pos:
-        player = ClassicTankPlayer(*map_board.get_cell_center(*player1_pos))
-        interface = InterfaceForClassicTank(player)
-        twoplayers_mode = False
-    else:
-        player1 = ClassicTankPlayer(*map_board.get_cell_center(*player1_pos))
-        player2 = ClassicTankSecondPlayer(*map_board.get_cell_center(*player2_pos))
-        interface = InterfaceForClassicTank(player1)
-        twoplayers_mode = True
+        if not player2_pos:
+            player = ClassicTankPlayer(*map_board.get_cell_center(*player1_pos))
+            interface = InterfaceForClassicTank(player)
+            twoplayers_mode = False
+        else:
+            player1 = ClassicTankPlayer(*map_board.get_cell_center(*player1_pos))
+            player2 = ClassicTankSecondPlayer(*map_board.get_cell_center(*player2_pos))
+            interface = InterfaceForClassicTank(player1)
+            twoplayers_mode = True
+    except Exception:
+        errorscreen()
+        break
 
     pg.time.set_timer(BOOSTER_SPAWN, GLOBAL_CFG["booster_spawn_frequency"] * 1000)
 
@@ -123,3 +140,4 @@ for i, level_file in enumerate(levels_folder):
         all_sprites.update()
 
         pg.display.flip()
+

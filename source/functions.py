@@ -1,5 +1,6 @@
 import os
 import sys
+import datetime as dt
 import pygame as pg
 
 
@@ -17,11 +18,8 @@ def terminate():
     sys.exit()
 
 
-# def level_validator(level):
-#     # кол-во строк
-#     if not 12 <= len(level) <= 13:
-#         return False
-#
-#     # кол-во элементов в строках
-#     for row in level[1:-1]:
-#         if len()
+def log(strdata: str):
+    strdata += dt.datetime.now().strftime("[%Y, %b %w] ")
+    with open("data/logs.txt", mode="w", encoding="utf-8") as f:
+        f.write(strdata)
+
