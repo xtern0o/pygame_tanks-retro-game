@@ -167,7 +167,6 @@ class ClassicTank(pg.sprite.Sprite):
                 self.mine_reloaded = True
 
         if pg.sprite.spritecollideany(self, border_group):
-            print("!")
             if self.direction == DIRECTION_UP:
                 self.rect = self.rect.move(0, self.speed)
             elif self.direction == DIRECTION_RIGHT:
