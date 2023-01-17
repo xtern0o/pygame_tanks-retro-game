@@ -2,7 +2,7 @@ import pygame as pg
 import random
 from math import sin
 
-from source.functions import load_image
+from source.functions import *
 from source.config import *
 from source.constants import *
 
@@ -103,6 +103,7 @@ class ClassicTank(pg.sprite.Sprite):
             ClassicTank.shoot_sound.play()
             self.is_reloaded = False
             ClassicBullet(self)
+            log(f"{self.objectname} выстрелил", small=True)
 
     def update(self, *args):
         if self.hp > CLASSIC_TANK_CFG["hp"] * 2 / 3:
@@ -174,8 +175,10 @@ class ClassicTank(pg.sprite.Sprite):
         ClassicTank.kill_sound.play()
         self.killed = True
         self.kill()
+        log(f"{self.objectname} уничтожен", small=True)
 
     def activate_booster(self, booster):
+        log(f"{self.objectname} активировал бустер: {booster.booster_type}", small=True)
         if booster.booster_type != HEALTH_BOOSTER:
             self.boosters[booster.booster_type] = BOOSTERS_CFG[f"{booster.booster_type}_time"]
             self.boosters_activated[booster.booster_type] = True
@@ -197,6 +200,7 @@ class ClassicTank(pg.sprite.Sprite):
             HealingParticle(booster)
 
     def place_mine(self):
+        log(f"{self.objectname} разместил мину по координатам ({self.rect.centerx}, {self.rect.centery})", small=True)
         if self.mines_count and self.mine_reloaded:
             Mine(*self.rect.center, self.group, self.enemy_group, self)
             self.mines_count -= 1

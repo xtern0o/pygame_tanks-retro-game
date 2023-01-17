@@ -1,0 +1,100 @@
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName2 выстрелил
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName2 выстрелил
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName2 выстрелил
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName2 выстрелил
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName2 выстрелил
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName2 выстрелил
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName2 выстрелил
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName2 выстрелил
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName2 выстрелил
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName2 выстрелил
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName2 уничтожен
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName2 выстрелил
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName2 выстрелил
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName2 выстрелил
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName2 выстрелил
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName2 выстрелил
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName2 выстрелил
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName2 выстрелил
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName2 выстрелил
+--- [2023, Jan 2] PlayerName1 разместил мину по координатам (528, 534)
+--- [2023, Jan 2] PlayerName1 разместил мину по координатам (528, 534)
+--- [2023, Jan 2] PlayerName1 разместил мину по координатам (528, 534)
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName2 выстрелил
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName2 выстрелил
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName2 выстрелил
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName2 уничтожен
+--- [2023, Jan 2] PlayerName2 выстрелил
+--- [2023, Jan 2] PlayerName2 выстрелил
+--- [2023, Jan 2] PlayerName2 выстрелил
+--- [2023, Jan 2] PlayerName2 выстрелил
+--- [2023, Jan 2] PlayerName2 выстрелил
+--- [2023, Jan 2] PlayerName2 выстрелил
+--- [2023, Jan 2] PlayerName2 выстрелил
+--- [2023, Jan 2] PlayerName2 выстрелил
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName1 разместил мину по координатам (429, 525)
+--- [2023, Jan 2] PlayerName1 разместил мину по координатам (429, 525)
+--- [2023, Jan 2] PlayerName1 разместил мину по координатам (429, 525)
+--- [2023, Jan 2] PlayerName1 разместил мину по координатам (429, 525)
+--- [2023, Jan 2] PlayerName1 разместил мину по координатам (429, 525)
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName1 разместил мину по координатам (429, 525)
+--- [2023, Jan 2] PlayerName1 разместил мину по координатам (429, 525)
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName2 уничтожен
+--- [2023, Jan 2] PlayerName2 выстрелил
+--- [2023, Jan 2] PlayerName2 выстрелил
+--- [2023, Jan 2] PlayerName2 выстрелил
+--- [2023, Jan 2] PlayerName2 выстрелил
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName2 выстрелил
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName2 выстрелил
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName1 выстрелил
+--- [2023, Jan 2] PlayerName1 разместил мину по координатам (483, 525)
+--- [2023, Jan 2] PlayerName1 разместил мину по координатам (480, 525)
+--- [2023, Jan 2] PlayerName1 разместил мину по координатам (477, 525)
+--- [2023, Jan 2] PlayerName1 разместил мину по координатам (474, 525)
+--- [2023, Jan 2] PlayerName1 разместил мину по координатам (471, 525)
+--- [2023, Jan 2] PlayerName1 разместил мину по координатам (468, 525)
+--- [2023, Jan 2] PlayerName1 разместил мину по координатам (465, 525)
+--- [2023, Jan 2] PlayerName1 разместил мину по координатам (462, 525)
+--- [2023, Jan 2] PlayerName1 разместил мину по координатам (459, 525)
+--- [2023, Jan 2] PlayerName1 разместил мину по координатам (456, 525)
+--- [2023, Jan 2] PlayerName2 уничтожен

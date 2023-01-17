@@ -1,47 +1,8 @@
-import os
-import time
-
 from source.gameobjects import *
-from source.functions import terminate
+from source.functions import *
 
 
 pg.init()
-
-
-def startscreen():
-    while True:
-        screen.blit(pg.transform.scale(load_image("startscreen.png"), (W, H)), pg.Rect(0, 0, W, H))
-        for event in pg.event.get():
-            if event.type == pg.QUIT:
-                terminate()
-            if event.type in (pg.MOUSEBUTTONDOWN, pg.KEYDOWN):
-                return None
-        pg.display.flip()
-        clock.tick(FPS)
-
-
-def errorscreen():
-    while True:
-        screen.blit(pg.transform.scale(load_image("error_screen.png"), (W, H)), pg.Rect(0, 0, W, H))
-        for event in pg.event.get():
-            if event.type == pg.QUIT:
-                terminate()
-            if event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:
-                terminate()
-        pg.display.flip()
-        clock.tick(FPS)
-
-
-def next_level_screen():
-    while True:
-        screen.blit(pg.transform.scale(load_image("next_map_screen.png"), (W, H)), pg.Rect(0, 0, W, H))
-        for event in pg.event.get():
-            if event.type == pg.QUIT:
-                terminate()
-            if event.type in (pg.MOUSEBUTTONDOWN, pg.KEYDOWN):
-                return None
-        pg.display.flip()
-        clock.tick(FPS)
 
 
 def spawn_random_booster():
@@ -63,7 +24,7 @@ def spawn_random_booster():
 pg.display.set_caption("Tanks Retro Game")
 
 clock = pg.time.Clock()
-startscreen()
+show_screen("startscreen.png", screen)
 
 map_board = MapBoard(16, 10)
 
@@ -88,7 +49,7 @@ for i, level_file in enumerate(levels_folder):
             interface = InterfaceForClassicTank(player1)
             twoplayers_mode = True
     except Exception:
-        errorscreen()
+        show_screen("error_screen.png", screen)
         break
 
     pg.time.set_timer(BOOSTER_SPAWN, GLOBAL_CFG["booster_spawn_frequency"] * 1000)
@@ -113,7 +74,8 @@ for i, level_file in enumerate(levels_folder):
                                            (random.randint(-5, 6), random.randint(-5, 6)))
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_c:
-                    next_level_screen()
+                    log(f"СМЕНА КАРТЫ")
+                    show_screen("next_map_screen.png", screen)
                     level_run = False
                     for sprite in all_sprites:
                         sprite.kill()
@@ -127,13 +89,21 @@ for i, level_file in enumerate(levels_folder):
         keys_pressed = pg.key.get_pressed()
         if keys_pressed[pg.K_ESCAPE]:
             terminate()
-        if not twoplayers_mode:
-            player.update(keys_pressed)
-            if player.killed:
-                pass
-        else:
+
+        if twoplayers_mode:
             player1.update(keys_pressed)
             player2.update(keys_pressed)
+            if player1.killed and not player2.killed:
+                log(f"Результаты дуэли: {player1.objectname} < {player2.objectname}")
+                show_screen("2_win.png", screen)
+            elif player2.killed and not player1.killed:
+                log(f"Результаты дуэли: {player1.objectname} > {player2.objectname}")
+                show_screen("1_win.png", screen)
+        else:
+            player.update(keys_pressed)
+            if player.killed:
+                show_screen("lose_screen.png", screen)
+                log(f"Игрок набрал: <{player.score}>")
 
         interface.update()
         all_sprites.draw(screen)
@@ -141,3 +111,4 @@ for i, level_file in enumerate(levels_folder):
 
         pg.display.flip()
 
+show_screen("end_screen.png")

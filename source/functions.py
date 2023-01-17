@@ -3,6 +3,8 @@ import sys
 import datetime as dt
 import pygame as pg
 
+from source.constants import *
+
 
 def load_image(name):
     fullname = os.path.join('source/data/images', name)
@@ -18,8 +20,38 @@ def terminate():
     sys.exit()
 
 
-def log(strdata: str):
-    strdata += dt.datetime.now().strftime("[%Y, %b %w] ")
-    with open("data/logs.txt", mode="w", encoding="utf-8") as f:
-        f.write(strdata)
+def log(strdata: str, small=None):
+    with open("source/data/logs.txt", mode="a", encoding="utf-8") as f:
+        if small is None:
+            f.write(dt.datetime.now().strftime("========\n[!] | [%Y, %b %w] ") + strdata + "\n========\n")
+        else:
+            f.write(dt.datetime.now().strftime("--- [%Y, %b %w] ") + strdata + "\n")
+
+
+def show_screen(filename: str, screen):
+    clock = pg.time.Clock()
+    if filename != "error_screen.png":
+        while True:
+            screen.blit(pg.transform.scale(load_image(filename), (W, H)), pg.Rect(0, 0, W, H))
+            for event in pg.event.get():
+                if event.type == pg.QUIT:
+                    terminate()
+                if event.type in (pg.MOUSEBUTTONDOWN, pg.KEYDOWN):
+                    if filename not in ("next_map_screen.png", "startscreen.png"):
+                        terminate()
+                    else:
+                        return None
+            pg.display.flip()
+            clock.tick(FPS)
+    else:
+        while True:
+            screen.blit(pg.transform.scale(load_image("error_screen.png"), (W, H)), pg.Rect(0, 0, W, H))
+            for event in pg.event.get():
+                if event.type == pg.QUIT:
+                    terminate()
+                if event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:
+                    terminate()
+            pg.display.flip()
+            clock.tick(FPS)
+
 
